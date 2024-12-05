@@ -67,6 +67,19 @@ int main()
         fscanf(fPtr,"%d %d %d", &all_lines[i].a0, &all_lines[i].a1, &all_lines[i].a2); //reads each value (seperated by a space) and copies it to the corresponding value in the 'lines'  struct
     }
     fclose(fPtr); //Closes the SingleStrokeFont file
+
+    
+    float user_scale;      //Initialising variable to hold user inputted scale
+    const float default_scale = 18.0;      //scale used in the SingleStrokeFont file
+    printf("Please input the scaling you would like for the font: ");
+    scanf("%f", &user_scale);       //Assigns user input to user_scale
+
+    float scale = user_scale / default_scale;   //Works out correct scaling
+    
+
+
+    
+
 }
     
     
