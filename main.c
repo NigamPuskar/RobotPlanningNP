@@ -11,7 +11,7 @@ void SendCommands (char *buffer );
 
 int main()
 {
-
+    /*
     //char mode[]= {'8','N','1',0};
     char buffer[100];
 
@@ -35,7 +35,7 @@ int main()
     WaitForDollar();
 
     printf ("\nThe robot is now ready to draw\n");
-
+    */
 
     FILE *fPtr; //Assigns a pointer to the file 
     fPtr = fopen("SingleStrokeFont.txt", "r" );  //Opens the SingleStrokeFont file in read only
@@ -47,8 +47,28 @@ int main()
         exit(0);
     }
 
-    int text_NumberOfRows = 1027; //Number of rows (as said in the project brief document) used to work out the number of structural arrays
+    int i = 0;
+    int SingleStrokeFont_NumberOfRows = 1027; //Number of rows (as said in the project brief document) used to work out the number of structural arrays
 
+    //Declares a structure that will be used to store the data from the "SingleStrokeFont.txt" file
+    struct line
+    {
+        int a0;     //holds the value of the x movement
+        int a1;     //holds the value of the y movement
+        int a2;     //holds the value of whether the pen is up or down
+    };
+
+    struct line all_lines[SingleStrokeFont_NumberOfRows]; //Defines a structural array which will contain each line of the SingleStrokeFont file 
+    
+
+    //The for loop iterates over the structural array and copies the values from the SingleStrokFont file to it
+    for (i = 0; i < SingleStrokeFont_NumberOfRows; i++)
+    {
+        fscanf(fPtr,"%d %d %d", &all_lines[i].a0, &all_lines[i].a1, &all_lines[i].a2); //reads each value (seperated by a space) and copies it to the corresponding value in the 'lines'  struct
+    }
+    fclose(fPtr); //Closes the SingleStrokeFont file
+}
+    
     
 
 
@@ -65,9 +85,7 @@ int main()
 
 
 
-
-
-
+/*
 
         //These commands get the robot into 'ready to draw mode' and need to be sent before any writing commands
     sprintf (buffer, "G1 X0 Y0 F1000\n");
@@ -115,3 +133,6 @@ void SendCommands (char *buffer )
     Sleep(100); // Can omit this when using the writing robot but has minimal effect
     // getch(); // Omit this once basic testing with emulator has taken place
 }
+
+
+*/
