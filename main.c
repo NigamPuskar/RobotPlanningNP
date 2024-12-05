@@ -43,7 +43,7 @@ int main()
     //This checks whether the file was openend correctly or not, if it wasn't then the program will exit
     if (fPtr == NULL) 
     {
-        printf("ERROR OPENING FILE: \"SingleStrokeFont!\"");
+        printf("ERROR OPENING FILE: \"SingleStrokeFont!!\"");
         exit(0);
     }
 
@@ -66,15 +66,8 @@ int main()
     {
         fscanf(fPtr,"%d %d %d", &all_lines[i].a0, &all_lines[i].a1, &all_lines[i].a2); //reads each value (seperated by a space) and copies it to the corresponding value in the 'lines'  struct
     }
-    fclose(fPtr); //Closes the SingleStrokeFont file
+    fclose(fPtr); //Close the SingleStrokeFont file
 }
-    
-    
-
-
-
-
-
 
 
 
