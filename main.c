@@ -37,6 +37,23 @@ int main()
     printf ("\nThe robot is now ready to draw\n");
     */
 
+
+    //This section asks the user an input, which will be used to scale the values in the SingleStrokeFont.txt file
+
+    float user_scale;      //Initialising variable to hold user inputted scale
+    const float default_scale = 18.0;      //scale used in the SingleStrokeFont file
+    
+    printf("Please input the scaling you would like for the font: ");
+2    scanf("%f", &user_scale);       //Assigns user input to user_scale
+
+    float scale = user_scale / default_scale;   //Works out correct scaling
+
+
+    //This section copies the data to a structure, where it is multiplied by the scaling values for the relevant x and y movements
+
+    int i;      //counter variable for 'for loop'
+    int SingleStrokeFont_NumberOfRows = 1027; //Number of rows (as said in the project brief document) used to work out the number of structural arrays
+    
     FILE *fPtr; //Assigns a pointer to the file 
     fPtr = fopen("SingleStrokeFont.txt", "r" );  //Opens the SingleStrokeFont file in read only
 
@@ -47,24 +64,34 @@ int main()
         exit(0);
     }
 
-    int i = 0;
-    int SingleStrokeFont_NumberOfRows = 1027; //Number of rows (as said in the project brief document) used to work out the number of structural arrays
-
     //Declares a structure that will be used to store the data from the "SingleStrokeFont.txt" file
     struct line
     {
-        int a0;     //holds the value of the x movement
-        int a1;     //holds the value of the y movement
+        float a0;     //holds the value of the x movement
+        float a1;     //holds the value of the y movement
         int a2;     //holds the value of whether the pen is up or down
     };
 
     struct line all_lines[SingleStrokeFont_NumberOfRows]; //Defines a structural array which will contain each line of the SingleStrokeFont file 
     
-
     //The for loop iterates over the structural array and copies the values from the SingleStrokFont file to it
     for (i = 0; i < SingleStrokeFont_NumberOfRows; i++)
     {
-        fscanf(fPtr,"%d %d %d", &all_lines[i].a0, &all_lines[i].a1, &all_lines[i].a2); //reads each value (seperated by a space) and copies it to the corresponding value in the 'lines'  struct
+        int temp_a0, temp_a1, temp_a2;  //Declares temporary variables used to store float versions of the data from SingleStrokeFont
+        fscanf(fPtr,"%d %d %d", &temp_a0, &temp_a1, &temp_a2); //reads each value (seperated by a space) and copies it to the corresponding value in the 'lines' struct
+        
+        if (temp_a0 != 999)     //If NOT a0 (therefore working with the lines inbetween 999 - the x and y coordinates), execute the code inside the if statement:
+        {
+            all_lines[i].a0 = (float)temp_a0 * scale;   //assign the line struct values to the scaled SingleStrokeFont data (x coordinates)
+            all_lines[i].a1 = (float)temp_a1 * scale;   //assign the line struct values to the scaled SingleStrokeFont data (y coordinates)
+        }
+
+        else    //if a0 is 999 (indicating the start of a new character), execute the code inside the else statement:
+        {
+          all_lines[i].a0 = temp_a0;    //Simply assigns the value of the temp placeholder to the line struct value
+          all_lines[i].a1 = temp_a1;    //Simply assigns the value of the temp placeholder to the line struct value
+        }
+        all_lines[i].a2 = temp_a2;      //Since a2 does not get affected by scaling, all elements are equated to the temp_a2 value
     }
     fclose(fPtr); //Close the SingleStrokeFont file
 }
