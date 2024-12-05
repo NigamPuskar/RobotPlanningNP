@@ -44,7 +44,7 @@ int main()
     const float default_scale = 18.0;      //scale used in the SingleStrokeFont file
     
     printf("Please input the scaling you would like for the font: ");
-2    scanf("%f", &user_scale);       //Assigns user input to user_scale
+    scanf("%f", &user_scale);       //Assigns user input to user_scale
 
     float scale = user_scale / default_scale;   //Works out correct scaling
 
@@ -95,15 +95,68 @@ int main()
     }
     fclose(fPtr); //Closes the SingleStrokeFont file
 
+
+    FILE *fPtr1;
+    fPtr1 = fopen("SingleWordTest.txt", "r");
+
+    int WordCount = 0;
+    char ch;
+
+    while((ch = fgetc(fPtr1)) != EOF)
+    {
+        if (ch == ' ' || ch == '\n' || ch =='\t')
+        {
+            WordCount++;
+        }
+        else if ((ch = fgetc(fPtr1)) == EOF)
+        {
+            WordCount++;
+        }
+        else
+        {
+            continue;
+        }
+        
+    }
+
+    printf("%d", WordCount);
+
+    struct words
+    {
+        int *word;
+        int size;
+    }
+
     
 
 
 
-
-
     
+/*
+    char *WordArray = NULL;
+    int Starting_Size = 1;
+    int Changing_Size = 2;
+    int *Start = &Starting_Size;
+    int *Change = &Changing_Size;  
 
+    WordArray = (char *)calloc(*Start, sizeof(char));
+
+    if (WordArray == NULL)
+    {
+        printf("\nUnable to allocate the memory requested");
+        printf("\n  ** Program terminating ** \n");
+        exit (1);
+    }
+    struct words
+    {
+        WordArray[]   
+    }*/
 }
+    
+
+
+
+    
     
     
 
