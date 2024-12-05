@@ -36,6 +36,39 @@ int main()
 
     printf ("\nThe robot is now ready to draw\n");
 
+
+    FILE *fPtr; //Assigns a pointer to the file 
+    fPtr = fopen("SingleStrokeFont.txt", "r" );  //Opens the SingleStrokeFont file in read only
+
+    //This checks whether the file was openend correctly or not, if it wasn't then the program will exit
+    if (fPtr == NULL) 
+    {
+        printf("ERROR OPENING FILE: \"SingleStrokeFont!\"");
+        exit(0);
+    }
+
+    int text_NumberOfRows = 1027; //Number of rows (as said in the project brief document) used to work out the number of structural arrays
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         //These commands get the robot into 'ready to draw mode' and need to be sent before any writing commands
     sprintf (buffer, "G1 X0 Y0 F1000\n");
     SendCommands(buffer);
