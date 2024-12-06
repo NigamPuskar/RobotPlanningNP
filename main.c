@@ -99,7 +99,14 @@ int main()
     FILE *fPtr1;
     fPtr1 = fopen("SingleWordTest.txt", "r");
 
+    if (fPtr1 == NULL) 
+    {
+        printf("ERROR OPENING FILE: \"SingleStrokeTest!\"");
+        exit(0);
+    }
+
     int WordCount = 0;
+    int l;
     char ch;
 
     while((ch = fgetc(fPtr1)) != EOF)
@@ -116,18 +123,49 @@ int main()
         {
             continue;
         }
-        
     }
 
-    printf("%d", WordCount);
+    rewind(fPtr1);
+
+    //Function to work out how many characters are in a word
+    int CountCharacters(FILE *fPtr1)
+    {
+        char ch;
+        int CharCount = 0;
+        while((ch = fgetc(fPtr1)) != EOF)
+        {
+            if (ch != ' ' || ch != '\n' || ch !='\t')
+            {
+                CharCount++;
+            }
+        }
+        return CharCount++; //Could move the character count to the next word, the return that for the next word
+    }
+
+    rewind(fPtr1);
+
+    int CharCount = CountCharacters(fPtr1);
+    printf("%d\n", WordCount);
+    printf("%d\n", CharCount);
 
     struct words
     {
-        int *word;
-        int size;
+        char *word;
+    };
+
+    struct words current_word;
+
+    current_word.word = NULL;
+    char ch;
+    int index = 0;
+
+    all_words->word = (int *)calloc(CharCount*sizeof(int));
+    if (all_words->word == NULL) 
+    {
+        printf("MEMORY ALLOCATION FAILED!\n");
+        exit(0);
     }
 
-    
 
 
 
