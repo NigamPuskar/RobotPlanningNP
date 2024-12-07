@@ -8,8 +8,8 @@
       "args": [],
       "stopAtEntry": false,
       "externalConsole": true,
-      "cwd": "c:/Users/nigam/Downloads/RobotWriter_v6.0/RobotWriter6SkeletonCode/Project Planning/plan",
-      "program": "c:/Users/nigam/Downloads/RobotWriter_v6.0/RobotWriter6SkeletonCode/Project Planning/plan/build/Debug/outDebug",
+      "cwd": "c:/Users/nigam/Downloads/RobotWriter_v6.0/RobotWriter6SkeletonCode",
+      "program": "c:/Users/nigam/Downloads/RobotWriter_v6.0/RobotWriter6SkeletonCode/build/Debug/outDebug",
       "MIMode": "gdb",
       "miDebuggerPath": "gdb",
       "setupCommands": [
