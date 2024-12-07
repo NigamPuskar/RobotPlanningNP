@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 //#include <conio.h>
 //#include <windows.h>
 #include "rs232.h"
@@ -35,8 +36,7 @@ int main()
     WaitForDollar();
 
     printf ("\nThe robot is now ready to draw\n");
-    */
-
+   */
 
     //This section asks the user an input, which will be used to scale the values in the SingleStrokeFont.txt file
 
@@ -102,11 +102,11 @@ int main()
     if (fPtr1 == NULL) 
     {
         printf("ERROR OPENING FILE: \"SingleStrokeTest!\"");
-        exit(0);
+        exit(1);
     }
 
+    //Counts how many words there are in the file to know how many structures are needed
     int WordCount = 0;
-    int l;
     char ch;
 
     while((ch = fgetc(fPtr1)) != EOF)
@@ -126,6 +126,67 @@ int main()
     }
 
     rewind(fPtr1);
+
+    struct Word
+    {
+        char *characters
+    };
+
+    //char ch;
+    int charCount = 0;
+    char temp[50];
+
+    struct Word All_Words [WordCount];
+
+    while((ch = fgetc(fPtr1)) != EOF)
+    {
+        if (ch != ' ' && ch != '\n' && ch !='\t')
+        {
+            temp[charCount] = ch;
+            charCount++;
+        }
+        else if (ch == ' ' || ch == '\n' || ch =='\t')
+        {
+            All_Words->characters = (char *)malloc((strlen(temp) + 1) * sizeof(char)); 
+                if (All_Words->characters == NULL)
+                {
+                    printf("ERROR ALLOCATING MEMORY!\n");
+                    exit(1);
+                }
+            strcpy(All_Words->characters, temp);
+            break;
+        }
+    }
+
+}  
+/*
+void ReadWord(FILE *fPtr1, struct Word *all_words, ??)
+{ 
+    char ch;
+    int charCount = 0;
+    char temp[50];
+    while((ch = fgetc(fPtr1)) != EOF)
+    {
+        if (ch != ' ' && ch != '\n' && ch !='\t')
+        {
+            charCount++;
+            temp[charCount] = ch;
+        }
+        else if (ch == ' ' && ch == '\n' && ch =='\t')
+        {
+            word -> characters = (char *)malloc((strlen(temp) + 1) * sizeof(char)); 
+                if (word->characters == NULL)
+                {
+                    printf("ERROR ALLOCATING MEMORY!\n");
+                    exit(1);
+                }
+            strcpy(word->characteres, temp);
+        }
+    }
+}
+    */
+
+    /*
 
     //Function to work out how many characters are in a word
     int CountCharacters(FILE *fPtr1)
@@ -150,27 +211,29 @@ int main()
 
     struct words
     {
-        char *word;
+        char word[CharCount];
     };
 
-    struct words current_word;
 
-    current_word.word = NULL;
-    char ch;
-    int index = 0;
+    struct words all_words[WordCount];
 
-    all_words->word = (int *)calloc(CharCount*sizeof(int));
-    if (all_words->word == NULL) 
+    //Function to add characters to each array
+    /*for (l = 0; l < CharCount; l++)
     {
-        printf("MEMORY ALLOCATION FAILED!\n");
-        exit(0);
-    }
+        while((ch = fgetc(fPtr1)) != EOF)
+        {
+            all_words[].word = ch;
+        }
+    }*/
 
+
+
+    //function to store characters from a word into the allocated memory
 
 
 
     
-/*
+    /*
     char *WordArray = NULL;
     int Starting_Size = 1;
     int Changing_Size = 2;
@@ -188,10 +251,9 @@ int main()
     struct words
     {
         WordArray[]   
-    }*/
-}
-    
-
+    }
+} 
+*/
 
 
     
@@ -248,7 +310,7 @@ int main()
     printf("Com port now closed\n");
 
     return (0);
-}
+
 
 // Send the data to the robot - note in 'PC' mode you need to hit space twice
 // as the dummy 'WaitForReply' has a getch() within the function.
