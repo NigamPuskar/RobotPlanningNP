@@ -44,7 +44,7 @@ int main()
     const float default_scale = 18.0;      //scale used in the SingleStrokeFont file
     
     printf("Please input the scaling you would like for the font: ");
-    scanf("%f", &user_scale);       //Assigns user input to user_scale
+2    scanf("%f", &user_scale);       //Assigns user input to user_scale
 
     float scale = user_scale / default_scale;   //Works out correct scaling
 
@@ -99,13 +99,6 @@ int main()
     FILE *fPtr1;
     fPtr1 = fopen("SingleWordTest.txt", "r");
 
-    if (fPtr1 == NULL) 
-    {
-        printf("ERROR OPENING FILE: \"SingleStrokeTest!\"");
-        exit(1);
-    }
-
-    //Counts how many words there are in the file to know how many structures are needed
     int WordCount = 0;
     char ch;
 
@@ -123,117 +116,23 @@ int main()
         {
             continue;
         }
+        
     }
 
-    rewind(fPtr1);
-
-    struct Word
-    {
-        char *characters
-    };
-
-    //char ch;
-    int charCount = 0;
-    char temp[50];
-
-    struct Word All_Words [WordCount];
-
-    while((ch = fgetc(fPtr1)) != EOF)
-    {
-        if (ch != ' ' && ch != '\n' && ch !='\t')
-        {
-            temp[charCount] = ch;
-            charCount++;
-        }
-        else if (ch == ' ' || ch == '\n' || ch =='\t')
-        {
-            All_Words->characters = (char *)malloc((strlen(temp) + 1) * sizeof(char)); 
-                if (All_Words->characters == NULL)
-                {
-                    printf("ERROR ALLOCATING MEMORY!\n");
-                    exit(1);
-                }
-            strcpy(All_Words->characters, temp);
-            break;
-        }
-    }
-
-}  
-/*
-void ReadWord(FILE *fPtr1, struct Word *all_words, ??)
-{ 
-    char ch;
-    int charCount = 0;
-    char temp[50];
-    while((ch = fgetc(fPtr1)) != EOF)
-    {
-        if (ch != ' ' && ch != '\n' && ch !='\t')
-        {
-            charCount++;
-            temp[charCount] = ch;
-        }
-        else if (ch == ' ' && ch == '\n' && ch =='\t')
-        {
-            word -> characters = (char *)malloc((strlen(temp) + 1) * sizeof(char)); 
-                if (word->characters == NULL)
-                {
-                    printf("ERROR ALLOCATING MEMORY!\n");
-                    exit(1);
-                }
-            strcpy(word->characteres, temp);
-        }
-    }
-}
-    */
-
-    /*
-
-    //Function to work out how many characters are in a word
-    int CountCharacters(FILE *fPtr1)
-    {
-        char ch;
-        int CharCount = 0;
-        while((ch = fgetc(fPtr1)) != EOF)
-        {
-            if (ch != ' ' || ch != '\n' || ch !='\t')
-            {
-                CharCount++;
-            }
-        }
-        return CharCount++; //Could move the character count to the next word, the return that for the next word
-    }
-
-    rewind(fPtr1);
-
-    int CharCount = CountCharacters(fPtr1);
-    printf("%d\n", WordCount);
-    printf("%d\n", CharCount);
+    printf("%d", WordCount);
 
     struct words
     {
-        char word[CharCount];
-    };
+        int *word;
+        int size;
+    }
 
-
-    struct words all_words[WordCount];
-
-    //Function to add characters to each array
-    /*for (l = 0; l < CharCount; l++)
-    {
-        while((ch = fgetc(fPtr1)) != EOF)
-        {
-            all_words[].word = ch;
-        }
-    }*/
-
-
-
-    //function to store characters from a word into the allocated memory
+    
 
 
 
     
-    /*
+/*
     char *WordArray = NULL;
     int Starting_Size = 1;
     int Changing_Size = 2;
@@ -251,9 +150,10 @@ void ReadWord(FILE *fPtr1, struct Word *all_words, ??)
     struct words
     {
         WordArray[]   
-    }
-} 
-*/
+    }*/
+}
+    
+
 
 
     
