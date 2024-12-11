@@ -68,7 +68,7 @@ int main()
     //This checks whether the file was openend correctly or not, if it wasn't then the program will exit
     if (fPtr == NULL) 
     {
-        printf("ERROR OPENING FILE: \"SingleStrokeFont!\"");
+        printf("ERROR OPENING FILE: \"SingleStrokeFont!!\"");
         exit(0);
     }
 
@@ -101,6 +101,7 @@ int main()
         }
         all_lines[i].a2 = temp_a2;      //Since a2 does not get affected by scaling, all elements are equated to the temp_a2 value
     }
+<<<<<<< HEAD
     fclose(fPtr); //Closes the SingleStrokeFont file
 
 
@@ -245,6 +246,10 @@ void ReadWord(FILE *fPtr1, struct Word *All_Words) //arguments for the function
 
 
 
+=======
+    fclose(fPtr); //Close the SingleStrokeFont file
+}
+>>>>>>> 503e52d35a4302d3c053afa9ee82fac6d9ed4b61
 
 
 
