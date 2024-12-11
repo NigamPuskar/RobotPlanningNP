@@ -16,7 +16,9 @@ struct Word
     char *characters;    //pointer to the character array
 };
 
-void ReadWord(FILE *fPtr1, struct Word *All_Words);
+void ReadWord(FILE *fPtr1, struct Word *All_Words, int *RunningP);  //Function prototype for the 'ReadWord' function
+
+int NewLine(int *RunningP, float scale, const int X_Limit, int *X_GlobalOffset, int Line)   //Function prototype for the 'Newline' function 
 
 int main()
 {
@@ -101,7 +103,6 @@ int main()
         }
         all_lines[i].a2 = temp_a2;      //Since a2 does not get affected by scaling, all elements are equated to the temp_a2 value
     }
-<<<<<<< HEAD
     fclose(fPtr); //Closes the SingleStrokeFont file
 
 
@@ -133,15 +134,25 @@ int main()
 
     struct Word All_Words[WordCount];  //creates an array of structures, with the amount of structures equalling the wordcount
     //printf("%s", All_Words[0].characters);
+  
+
+    //Adding variables for new line function
+    int Running_CharCount = 0;  //initalises a running character count variable
+    int *RunningP = &Running_CharCount;     //pointer to the memory address of the running char count variable
+    const int X_Limit = 100;   //
+    int X_GlobalOffset = 0;
+    int *XP = &X_GlobalOffset;
     All_Words->characters = NULL;
-    ReadWord(fPtr1, &All_Words[0]);
+    ReadWord(fPtr1, &All_Words[0], &Running_CharCount);
+    NewLine(RunningP, scale, X_limit, &X_GlobalOffset, line)
     printf("%s", All_Words->characters);
     free(All_Words);
+
 
 }  
 
 //Function to read a word and allocate it to the structure 'word'
-void ReadWord(FILE *fPtr1, struct Word *All_Words) //arguments for the function
+void ReadWord(FILE *fPtr1, struct Word *All_Words, int *RunningP) //arguments for the function
 { 
     int charCount = 0;  //initialises character count to 0
     char temp[50];  //temporary array used to store the characters, which will be copied to the array in '*characters'
@@ -152,9 +163,14 @@ void ReadWord(FILE *fPtr1, struct Word *All_Words) //arguments for the function
         {
             temp[charCount] = ch;   //Add the character to the temp array
             charCount++;    //increment the character count by 1
+            (*RunningP)++;     //increments the running count value by 1
         }
         else if (ch == ' ' || ch == '\n' || ch =='\t') //If there's a space, new line or tab, execute the else if statement
         {
+            if (ch == ' ')
+            {
+                (*RunningP)++;   //Increments the running count value by 1 for spaces
+            }
             temp[charCount] = '\0'; //append the temp array with a null terminator (used to copy the string in temp into the 'All_words.characters array)
             All_Words->characters = (char *)malloc((strlen(temp) + 1) * sizeof(char));    //dynamically allocate memory to the characters array
                 if (All_Words->characters == NULL)    //Execute if statement that exits the if loop if there's not sufficient memory
@@ -166,6 +182,17 @@ void ReadWord(FILE *fPtr1, struct Word *All_Words) //arguments for the function
             return;
         }
     }
+}
+
+int NewLine(int *RunningP, float scale, const int X_Limit, int *X_GlobalOffset, int line)
+{
+    int lenth = *RunningP * Scale;  
+    if (length > X_Limit)
+    {
+        *X_GlobalOffset = 0;
+        Line++;
+        return Line;
+    } 
 }
 
     /*
@@ -246,10 +273,6 @@ void ReadWord(FILE *fPtr1, struct Word *All_Words) //arguments for the function
 
 
 
-=======
-    fclose(fPtr); //Close the SingleStrokeFont file
-}
->>>>>>> 503e52d35a4302d3c053afa9ee82fac6d9ed4b61
 
 
 
