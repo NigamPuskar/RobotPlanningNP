@@ -1,0 +1,122 @@
+[33mcommit 277110171a7205c0181655418b5f03e8a99c133a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mScaling-Struct[m[33m)[m
+Author: Nigam Puskar <nigampuskar02@gmail.com>
+Date:   Sat Dec 7 15:05:33 2024 +0000
+
+    Revert "obtain word count from test file"
+    
+    This reverts commit 3890b3c7efa5545a6461f6c3bacd2c274307f34d.
+
+[33mcommit 9c3c8cb5c4bc9e2e19783eea5e5a69dbf8e8e885[m
+Author: Nigam Puskar <nigampuskar02@gmail.com>
+Date:   Sat Dec 7 14:59:05 2024 +0000
+
+    Save progress before reverting (lost debug file)
+
+[33mcommit 49bb53509a8af8b0f74c3c28f44d33379b20dba9[m
+Author: Nigam Puskar <nigampuskar02@gmail.com>
+Date:   Fri Dec 6 00:53:47 2024 +0000
+
+    struct formed for reading a word
+
+[33mcommit 3890b3c7efa5545a6461f6c3bacd2c274307f34d[m
+Author: Nigam Puskar <nigampuskar02@gmail.com>
+Date:   Thu Dec 5 22:36:45 2024 +0000
+
+    obtain word count from test file
+
+[33mcommit c795844d519d15202f9665b9f003fd20a06b4a12[m[33m ([m[1;31morigin/Scaling-Struct[m[33m)[m
+Author: Nigam Puskar <nigampuskar02@gmail.com>
+Date:   Thu Dec 5 13:07:32 2024 +0000
+
+    Prompted the user to input the scaling value before opening the file, added scaling to the structure during the for loop
+
+[33mcommit fa5ba1be727141258b5caa92efe3f1b06e133a43[m
+Author: Nigam Puskar <nigampuskar02@gmail.com>
+Date:   Thu Dec 5 11:47:52 2024 +0000
+
+    Added user input for scaling
+
+[33mcommit dd7161e8b2288d5c4e35441429c93b87b6650f5d[m[33m ([m[1;31morigin/SingleStrokeFont-Reading[m[33m, [m[1;32mSingleStrokeFont-Reading[m[33m)[m
+Author: Nigam Puskar <nigampuskar02@gmail.com>
+Date:   Thu Dec 5 10:10:24 2024 +0000
+
+    values transferred from singlestrokefont to all_lines struct
+
+[33mcommit 7a16fc5c15dda64b4c9f17ea551ad1a351702914[m[33m ([m[1;31morigin/main[m[33m, [m[1;32mmain[m[33m)[m
+Author: Nigam Puskar <nigampuskar02@gmail.com>
+Date:   Thu Dec 5 09:55:51 2024 +0000
+
+    Data from SingleStrokeFont file put into all_lines structural array
+
+[33mcommit d1dec5e9c6c90de151ca38f0a5aa301443df76db[m
+Author: Nigam Puskar <nigampuskar02@gmail.com>
+Date:   Thu Dec 5 09:18:05 2024 +0000
+
+    Fixed the file opening
+
+[33mcommit d0576b45b04027fb81423a220ddcc1410366bb4f[m
+Author: Nigam Puskar <nigampuskar02@gmail.com>
+Date:   Thu Dec 5 09:11:52 2024 +0000
+
+    Code to open the file
+
+[33mcommit 71503b1865a68fe1337a3f7f208ef5940cb73a47[m
+Author: Nigam Puskar <nigampuskar02@gmail.com>
+Date:   Thu Dec 5 08:57:31 2024 +0000
+
+    files to be added
+
+[33mcommit 5f5640e9848c95c89a49368fd455da9e8627de0c[m
+Author: Nigam Puskar <nigampuskar02@gmail.com>
+Date:   Thu Dec 5 08:56:23 2024 +0000
+
+    Added files to store functions
+
+[33mcommit 3203e90b3be9ce4d40ad0c990bf445e695a32247[m
+Merge: 9f41749 057bf16
+Author: Nigam Puskar <nigampuskar02@gmail.com>
+Date:   Thu Dec 5 04:49:59 2024 +0000
+
+    Merge branch 'main' of https://github.com/NigamPuskar/RobotWriter6SkeletonCode
+
+[33mcommit 9f417493f6c2a54bd280c62862fea1dd151c86fc[m
+Author: Nigam Puskar <nigampuskar02@gmail.com>
+Date:   Thu Dec 5 04:49:52 2024 +0000
+
+    Starting from scratch
+
+[33mcommit 057bf166988bedec918ff9731d6fe990027790ed[m
+Author: NigamPuskar <nigampuskar02@gmail.com>
+Date:   Thu Nov 14 14:37:31 2024 +0000
+
+    Add files via upload
+
+[33mcommit 3f61bf759bd279c849f34a849025214a2d45a0cd[m
+Author: NigamPuskar <nigampuskar02@gmail.com>
+Date:   Thu Nov 14 13:31:32 2024 +0000
+
+    Delete Week 7 Laboratory exercises 24-25 (1).docx
+
+[33mcommit d933d99b54e822253b39951ec6c9595f5624b29d[m
+Author: NigamPuskar <nigampuskar02@gmail.com>
+Date:   Thu Nov 14 13:31:09 2024 +0000
+
+    Delete Computer Engineering and Mechatronics Project Planning v7.0 (2).docx
+
+[33mcommit 0f8774ec1dcbd9090e2a19d5558eb1c4a6e90b89[m
+Author: NigamPuskar <nigampuskar02@gmail.com>
+Date:   Thu Nov 14 13:29:58 2024 +0000
+
+    Add files via upload
+
+[33mcommit 536552be58c87727446b6a345bc114187343c3c8[m
+Author: NigamPuskar <nigampuskar02@gmail.com>
+Date:   Thu Nov 14 13:24:09 2024 +0000
+
+    Add files via upload
+
+[33mcommit a802935a36b0083d547d45ca51b2ec842cbafd60[m
+Author: Nigam Puskar <nigampuskar02@gmail.com>
+Date:   Thu Nov 14 13:19:20 2024 +0000
+
+    first commit

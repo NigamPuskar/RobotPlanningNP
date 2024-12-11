@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 //#include <conio.h>
 //#include <windows.h>
 #include "rs232.h"
@@ -8,6 +9,16 @@
 #define bdrate 115200               /* 115200 baud */
 
 void SendCommands (char *buffer );
+
+//Initialises structure that is used to store each word and it's characters
+struct Word     
+{
+    char *characters;    //pointer to the character array
+};
+
+void ReadWord(FILE *fPtr1, struct Word *All_Words, int *RunningP);  //Function prototype for the 'ReadWord' function
+
+int NewLine(int *RunningP, float scale, const int X_Limit, int *X_GlobalOffset, int Line)   //Function prototype for the 'Newline' function 
 
 int main()
 {
@@ -35,8 +46,7 @@ int main()
     WaitForDollar();
 
     printf ("\nThe robot is now ready to draw\n");
-    */
-
+   */
 
     //This section asks the user an input, which will be used to scale the values in the SingleStrokeFont.txt file
 
@@ -44,7 +54,7 @@ int main()
     const float default_scale = 18.0;      //scale used in the SingleStrokeFont file
     
     printf("Please input the scaling you would like for the font: ");
-2    scanf("%f", &user_scale);       //Assigns user input to user_scale
+    scanf("%f", &user_scale);       //Assigns user input to user_scale
 
     float scale = user_scale / default_scale;   //Works out correct scaling
 
@@ -93,8 +103,176 @@ int main()
         }
         all_lines[i].a2 = temp_a2;      //Since a2 does not get affected by scaling, all elements are equated to the temp_a2 value
     }
-    fclose(fPtr); //Close the SingleStrokeFont file
+    fclose(fPtr); //Closes the SingleStrokeFont file
+
+
+    FILE *fPtr1;
+    fPtr1 = fopen("SingleWordTest.txt", "r");
+
+    if (fPtr1 == NULL) 
+    {
+        printf("ERROR OPENING FILE: \"SingleStrokeTest!\"");
+        exit(1);
+    }
+    //Counts how many words there are in the file to know how many structures are needed
+    int WordCount = 0;  //initialises word count
+    char ch;   
+
+    while((ch = fgetc(fPtr1)) != EOF)     //Goes through each character in the text file that 'fPtr1' is pointing at 
+    {
+        if (ch == ' ' || ch == '\n' || ch =='\t')   //If there's a space, new line or tab, execute the if statement
+        {
+            WordCount++;    //increments the word count by 1
+        }
+        /*else if ((ch = fgetc(fPtr1)) == EOF)   //else if the end of the file is reached
+        {
+            WordCount++;   //increments the word count by 1  
+        }*/
+    }
+
+    rewind(fPtr1);  //Resets the file position to the beginning of the file 
+
+    struct Word All_Words[WordCount];  //creates an array of structures, with the amount of structures equalling the wordcount
+    //printf("%s", All_Words[0].characters);
+  
+
+    //Adding variables for new line function
+    int Running_CharCount = 0;  //initalises a running character count variable
+    int *RunningP = &Running_CharCount;     //pointer to the memory address of the running char count variable
+    const int X_Limit = 100;   //
+    int X_GlobalOffset = 0;
+    int *XP = &X_GlobalOffset;
+    All_Words->characters = NULL;
+    ReadWord(fPtr1, &All_Words[0], &Running_CharCount);
+    NewLine(RunningP, scale, X_limit, &X_GlobalOffset, line)
+    printf("%s", All_Words->characters);
+    free(All_Words);
+
+
+}  
+
+//Function to read a word and allocate it to the structure 'word'
+void ReadWord(FILE *fPtr1, struct Word *All_Words, int *RunningP) //arguments for the function
+{ 
+    int charCount = 0;  //initialises character count to 0
+    char temp[50];  //temporary array used to store the characters, which will be copied to the array in '*characters'
+    char ch;    
+    while((ch = fgetc(fPtr1)) != EOF)   //Goes through each character in the text file that 'fPtr1' is pointing at
+    {
+        if (ch != ' ' && ch != '\n' && ch !='\t')      //If there isn't a space, new line or tab, execute the if statement
+        {
+            temp[charCount] = ch;   //Add the character to the temp array
+            charCount++;    //increment the character count by 1
+            (*RunningP)++;     //increments the running count value by 1
+        }
+        else if (ch == ' ' || ch == '\n' || ch =='\t') //If there's a space, new line or tab, execute the else if statement
+        {
+            if (ch == ' ')
+            {
+                (*RunningP)++;   //Increments the running count value by 1 for spaces
+            }
+            temp[charCount] = '\0'; //append the temp array with a null terminator (used to copy the string in temp into the 'All_words.characters array)
+            All_Words->characters = (char *)malloc((strlen(temp) + 1) * sizeof(char));    //dynamically allocate memory to the characters array
+                if (All_Words->characters == NULL)    //Execute if statement that exits the if loop if there's not sufficient memory
+                {
+                    printf("ERROR ALLOCATING MEMORY!\n");
+                    exit(1);
+                }
+            strcpy(All_Words->characters, temp);  //copies the contents of the temp array to the strucuture all_words.characters
+            return;
+        }
+    }
 }
+
+int NewLine(int *RunningP, float scale, const int X_Limit, int *X_GlobalOffset, int line)
+{
+    int lenth = *RunningP * Scale;  
+    if (length > X_Limit)
+    {
+        *X_GlobalOffset = 0;
+        Line++;
+        return Line;
+    } 
+}
+
+    /*
+
+    //Function to work out how many characters are in a word
+    int CountCharacters(FILE *fPtr1)
+    {
+        char ch;
+        int CharCount = 0;
+        while((ch = fgetc(fPtr1)) != EOF)
+        {
+            if (ch != ' ' || ch != '\n' || ch !='\t')
+            {
+                CharCount++;
+            }
+        }
+        return CharCount++; //Could move the character count to the next word, the return that for the next word
+    }
+
+    rewind(fPtr1);
+
+    int CharCount = CountCharacters(fPtr1);
+    printf("%d\n", WordCount);
+    printf("%d\n", CharCount);
+
+    struct words
+    {
+        char word[CharCount];
+    };
+
+
+    struct words all_words[WordCount];
+
+    //Function to add characters to each array
+    /*for (l = 0; l < CharCount; l++)
+    {
+        while((ch = fgetc(fPtr1)) != EOF)
+        {
+            all_words[].word = ch;
+        }
+    }*/
+
+
+
+    //function to store characters from a word into the allocated memory
+
+
+
+    
+    /*
+    char *WordArray = NULL;
+    int Starting_Size = 1;
+    int Changing_Size = 2;
+    int *Start = &Starting_Size;
+    int *Change = &Changing_Size;  
+
+    WordArray = (char *)calloc(*Start, sizeof(char));
+
+    if (WordArray == NULL)
+    {
+        printf("\nUnable to allocate the memory requested");
+        printf("\n  ** Program terminating ** \n");
+        exit (1);
+    }
+    struct words
+    {
+        WordArray[]   
+    }
+} 
+*/
+
+
+    
+    
+    
+
+
+
+
+
 
 
 
@@ -141,7 +319,7 @@ int main()
     printf("Com port now closed\n");
 
     return (0);
-}
+
 
 // Send the data to the robot - note in 'PC' mode you need to hit space twice
 // as the dummy 'WaitForReply' has a getch() within the function.
