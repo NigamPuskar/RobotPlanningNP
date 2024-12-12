@@ -28,7 +28,9 @@ void ReadWord(FILE *fPtr1, struct Word *All_Words, int *RunningP);  //Function p
 
 int NewLine(int *RunningP, float scale, const int X_Limit, int *XPtr, int line);   //Function prototype for the 'Newline' function 
 
-float x_coordinate(int j, struct line *all_lines, int p, int *XPtr, int user_scale, float X_local);     //Function prototype for the 'X_coordinate' function 
+float x_coordinate(int *XPtr, int user_scale, int j, struct line *all_lines, int p, float X_local);     //Function prototype for the 'X_coordinate' function 
+
+float y_coordinate(int *YPtr, int user_scale, int line, int line_spacing, struct line *all_lines, int p, float Y_local);  //Function prototype for the'Y_coordinate function'
 
 int main()
 {
@@ -152,6 +154,8 @@ int main()
     int j = 0;
     int line = 0;
     float X_local = 0;
+    float Y_local = 0;
+    int line_spacing = 5;   //Spacing between each line of characters
 
     All_Words->characters = NULL;
     ReadWord(fPtr1, &All_Words[0], &Running_CharCount);
@@ -168,10 +172,10 @@ int main()
             {
                 p++;
                 printf("Calling x_coordinate for p = %d\n", p);  // Debug log
-                float x_local = x_coordinate(j, all_lines, p, &X_GlobalOffset, user_scale, X_local);
+                float x_local = x_coordinate(&X_GlobalOffset, user_scale, j, all_lines, p, X_local);
+                float y_local = y_coordinate(&Y_GlobalOffset, user_scale, line, line_spacing, all_lines, p, Y_local);
+                float y_coordinate(int *YPtr, int user_scale, int line, int line_spacing, struct line *all_lines, int p, float Y_local);
                 j++;
-                printf("X_local after x_coordinate: %f\n", X_local);  // Debug log
-                printf("XP after x_coordinate: %f\n", *XPtr);
             }
 
         }
@@ -224,7 +228,7 @@ int NewLine(int *RunningP, float scale, const int X_Limit, int *XPtr, int line)
 }
 
 
-float x_coordinate(int j, struct line *all_lines, int p, int *XPtr, int user_scale, float X_local)
+float x_coordinate(int *XPtr, int user_scale, int j, struct line *all_lines, int p, float X_local)
 {
     *XPtr = user_scale * j;
     while (all_lines[p].a0 != 999)
@@ -236,7 +240,16 @@ float x_coordinate(int j, struct line *all_lines, int p, int *XPtr, int user_sca
     /*return X_local;*/
 }
 
-//float y_coordinate(int j, struct line *all_lines, int p, int *XPtr, int user_scale, float X_local)
+float y_coordinate(int *YPtr, int user_scale, int line, int line_spacing, struct line *all_lines, int p, float Y_local)
+{
+    *YPtr = 0 - user_scale - (user_scale * line) - (line_spacing * line);      //Works out global Y coordinate
+    while (all_lines[p].a0 != 999)
+    {
+        Y_local = *YPtr + (all_lines[p].a1);
+        printf("%f  %d   %f\n", all_lines[p].a1, *YPtr, Y_local);
+        p++;
+    }
+}
 
 /*
 
