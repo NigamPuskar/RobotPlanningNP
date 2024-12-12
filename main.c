@@ -26,9 +26,9 @@ struct line
 
 void ReadWord(FILE *fPtr1, struct Word *All_Words, int *RunningP);  //Function prototype for the 'ReadWord' function
 
-int NewLine(int *RunningP, float scale, const int X_Limit, int *X_GlobalOffset, int line);   //Function prototype for the 'Newline' function 
+int NewLine(int *RunningP, float scale, const int X_Limit, int *XPtr, int line);   //Function prototype for the 'Newline' function 
 
-float x_coordinate(int j, struct line *all_lines, int p, int *XP, int user_scale, float X_local);     //Function prototype for the 'X_coordinate' function 
+float x_coordinate(int j, struct line *all_lines, int p, int *XPtr, int user_scale, float X_local);     //Function prototype for the 'X_coordinate' function 
 
 int main()
 {
@@ -144,10 +144,10 @@ int main()
     const int X_Limit = 100;   //
     
     int X_GlobalOffset = 0;
-    int *XP = &X_GlobalOffset;
+    int *XPtr = &X_GlobalOffset;
 
-    int Y_GlobalOffset = scale * default_scale;
-    int *YP = &Y_GlobalOffset; 
+    int Y_GlobalOffset = 0;
+    int *YPtr = &Y_GlobalOffset; 
     int p;
     int j = 0;
     int line = 0;
@@ -160,17 +160,21 @@ int main()
 
     printf("%f", all_lines[0].a0);
 
-    for (p = 0; p <= SingleStrokeFont_NumberOfRows; p++)
+    for (int w = 0; All_Words->characters[w] != '\0'; w++ )
     {
-        if (all_lines[p].a0 == 999 && all_lines[p].a1 == 1)
+        for (p = 0; p <= SingleStrokeFont_NumberOfRows; p++)
         {
-            p++;
-            printf("Calling x_coordinate for p = %d\n", p);  // Debug log
-            float x_local = x_coordinate(j, all_lines, p, &X_GlobalOffset, user_scale, X_local);
-            printf("X_local after x_coordinate: %f\n", X_local);  // Debug log
-            printf("XP after x_coordinate: %f\n", *XP);
-        }
+            if (all_lines[p].a0 == 999 && all_lines[p].a1 == All_Words->characters[w])
+            {
+                p++;
+                printf("Calling x_coordinate for p = %d\n", p);  // Debug log
+                float x_local = x_coordinate(j, all_lines, p, &X_GlobalOffset, user_scale, X_local);
+                j++;
+                printf("X_local after x_coordinate: %f\n", X_local);  // Debug log
+                printf("XP after x_coordinate: %f\n", *XPtr);
+            }
 
+        }
     }
     free(All_Words);
 }  
@@ -208,29 +212,31 @@ void ReadWord(FILE *fPtr1, struct Word *All_Words, int *RunningP) //arguments fo
     }
 }
 
-int NewLine(int *RunningP, float scale, const int X_Limit, int *X_GlobalOffset, int line)
+int NewLine(int *RunningP, float scale, const int X_Limit, int *XPtr, int line)
 {
     int length = *RunningP * scale;  
     if (length > X_Limit)
     {
-        *X_GlobalOffset = 0;
+        *XPtr = 0;
         line++;
         return line;
     } 
 }
 
 
-float x_coordinate(int j, struct line *all_lines, int p, int *XP, int user_scale, float X_local)
+float x_coordinate(int j, struct line *all_lines, int p, int *XPtr, int user_scale, float X_local)
 {
-    *XP = user_scale * j;
+    *XPtr = user_scale * j;
     while (all_lines[p].a0 != 999)
     {
-        X_local = *XP +  (all_lines[p].a0);
-        printf("%f  %d   %f\n", all_lines[p].a0, *XP, X_local);
+        X_local = *XPtr + (all_lines[p].a0);
+        printf("%f  %d   %f\n", all_lines[p].a0, *XPtr, X_local);
         p++;
     }
     /*return X_local;*/
 }
+
+//float y_coordinate(int j, struct line *all_lines, int p, int *XPtr, int user_scale, float X_local)
 
 /*
 
