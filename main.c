@@ -34,7 +34,7 @@ float y_coordinate(int *YPtr, int user_scale, int line, int line_spacing, struct
 
 int main()
 {
-    /*
+    
     //char mode[]= {'8','N','1',0};
     char buffer[100];
 
@@ -58,7 +58,7 @@ int main()
     WaitForDollar();
 
     printf ("\nThe robot is now ready to draw\n");
-   */
+   
 
     //This section asks the user an input, which will be used to scale the values in the SingleStrokeFont.txt file
 
@@ -162,7 +162,7 @@ int main()
     NewLine(RunningP, scale, X_Limit, &X_GlobalOffset, line);
     printf("%s", All_Words->characters);
 
-    printf("%f", all_lines[0].a0);
+    printf("%f\n", all_lines[0].a0);
 
     for (int w = 0; All_Words->characters[w] != '\0'; w++ )
     {
@@ -171,13 +171,18 @@ int main()
             if (all_lines[p].a0 == 999 && all_lines[p].a1 == All_Words->characters[w])
             {
                 p++;
-                printf("Calling x_coordinate for p = %d\n", p);  // Debug log
-                float x_local = x_coordinate(&X_GlobalOffset, user_scale, j, all_lines, p, X_local);
-                float y_local = y_coordinate(&Y_GlobalOffset, user_scale, line, line_spacing, all_lines, p, Y_local);
-                float y_coordinate(int *YPtr, int user_scale, int line, int line_spacing, struct line *all_lines, int p, float Y_local);
+                while (all_lines[p].a0 != 999)
+                {
+                    //printf("Calling x_coordinate for p = %d\n", p);  // Debug log
+                    float x_local = x_coordinate(&X_GlobalOffset, user_scale, j, all_lines, p, X_local);
+                    float y_local = y_coordinate(&Y_GlobalOffset, user_scale, line, line_spacing, all_lines, p, Y_local);
+                    snprintf(buffer, 100, "G%d X%f Y%f\n", all_lines[p].a2, x_local, y_local);
+                    //SendCommands(buffer);
+                    printf ("%s", buffer);
+                    p++;
+                }
                 j++;
             }
-
         }
     }
     free(All_Words);
@@ -231,29 +236,22 @@ int NewLine(int *RunningP, float scale, const int X_Limit, int *XPtr, int line)
 float x_coordinate(int *XPtr, int user_scale, int j, struct line *all_lines, int p, float X_local)
 {
     *XPtr = user_scale * j;
-    while (all_lines[p].a0 != 999)
-    {
-        X_local = *XPtr + (all_lines[p].a0);
-        printf("%f  %d   %f\n", all_lines[p].a0, *XPtr, X_local);
-        p++;
-    }
-    /*return X_local;*/
+    X_local = *XPtr + (all_lines[p].a0);
+    //printf("%f  %d   %f\n", all_lines[p].a0, *XPtr, X_local);
+    return X_local;
 }
 
 float y_coordinate(int *YPtr, int user_scale, int line, int line_spacing, struct line *all_lines, int p, float Y_local)
 {
     *YPtr = 0 - user_scale - (user_scale * line) - (line_spacing * line);      //Works out global Y coordinate
-    while (all_lines[p].a0 != 999)
-    {
-        Y_local = *YPtr + (all_lines[p].a1);
-        printf("%f  %d   %f\n", all_lines[p].a1, *YPtr, Y_local);
-        p++;
-    }
+    Y_local = *YPtr + (all_lines[p].a1);
+    //printf("%f  %d   %f\n", all_lines[p].a1, *YPtr, Y_local);
+    return Y_local;
 }
 
 /*
 
-        //These commands get the robot into 'ready to draw mode' and need to be sent before any writing commands
+    //These commands get the robot into 'ready to draw mode' and need to be sent before any writing commands
     sprintf (buffer, "G1 X0 Y0 F1000\n");
     SendCommands(buffer);
     sprintf (buffer, "M3\n");
