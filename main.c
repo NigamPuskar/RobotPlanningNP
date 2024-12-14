@@ -16,13 +16,25 @@ struct Word
     char *characters;    //pointer to the character array
 };
 
+//Declares a structure that will be used to store the data from the "SingleStrokeFont.txt" file
+struct line
+{
+    float a0;     //holds the value of the x movement
+    float a1;     //holds the value of the y movement
+    int a2;     //holds the value of whether the pen is up or down
+};
+
 void ReadWord(FILE *fPtr1, struct Word *All_Words, int *RunningP);  //Function prototype for the 'ReadWord' function
 
-int NewLine(int *RunningP, float scale, const int X_Limit, int *X_GlobalOffset, int Line)   //Function prototype for the 'Newline' function 
+int NewLine(int *RunningP, float scale, const int X_Limit, int *XPtr, int line);   //Function prototype for the 'Newline' function 
+
+float x_coordinate(int *XPtr, int user_scale, int j, struct line *all_lines, int p, float X_local);     //Function prototype for the 'X_coordinate' function 
+
+float y_coordinate(int *YPtr, int user_scale, int line, int line_spacing, struct line *all_lines, int p, float Y_local);  //Function prototype for the'Y_coordinate function'
 
 int main()
 {
-    /*
+    
     //char mode[]= {'8','N','1',0};
     char buffer[100];
 
@@ -46,7 +58,7 @@ int main()
     WaitForDollar();
 
     printf ("\nThe robot is now ready to draw\n");
-   */
+   
 
     //This section asks the user an input, which will be used to scale the values in the SingleStrokeFont.txt file
 
@@ -73,14 +85,6 @@ int main()
         printf("ERROR OPENING FILE: \"SingleStrokeFont!!\"");
         exit(0);
     }
-
-    //Declares a structure that will be used to store the data from the "SingleStrokeFont.txt" file
-    struct line
-    {
-        float a0;     //holds the value of the x movement
-        float a1;     //holds the value of the y movement
-        int a2;     //holds the value of whether the pen is up or down
-    };
 
     struct line all_lines[SingleStrokeFont_NumberOfRows]; //Defines a structural array which will contain each line of the SingleStrokeFont file 
     
@@ -140,15 +144,48 @@ int main()
     int Running_CharCount = 0;  //initalises a running character count variable
     int *RunningP = &Running_CharCount;     //pointer to the memory address of the running char count variable
     const int X_Limit = 100;   //
+    
     int X_GlobalOffset = 0;
-    int *XP = &X_GlobalOffset;
+    int *XPtr = &X_GlobalOffset;
+
+    int Y_GlobalOffset = 0;
+    int *YPtr = &Y_GlobalOffset; 
+    int p;
+    int j = 0;
+    int line = 0;
+    float X_local = 0;
+    float Y_local = 0;
+    int line_spacing = 5;   //Spacing between each line of characters
+
     All_Words->characters = NULL;
     ReadWord(fPtr1, &All_Words[0], &Running_CharCount);
-    NewLine(RunningP, scale, X_limit, &X_GlobalOffset, line)
+    NewLine(RunningP, scale, X_Limit, &X_GlobalOffset, line);
     printf("%s", All_Words->characters);
+
+    printf("%f\n", all_lines[0].a0);
+
+    for (int w = 0; All_Words->characters[w] != '\0'; w++ )
+    {
+        for (p = 0; p <= SingleStrokeFont_NumberOfRows; p++)
+        {
+            if (all_lines[p].a0 == 999 && all_lines[p].a1 == All_Words->characters[w])
+            {
+                p++;
+                while (all_lines[p].a0 != 999)
+                {
+                    //printf("Calling x_coordinate for p = %d\n", p);  // Debug log
+                    float x_local = x_coordinate(&X_GlobalOffset, user_scale, j, all_lines, p, X_local);
+                    float y_local = y_coordinate(&Y_GlobalOffset, user_scale, line, line_spacing, all_lines, p, Y_local);
+                    snprintf(buffer, 100, "G%d X%f Y%f\n", all_lines[p].a2, x_local, y_local);
+                    //SendCommands(buffer);
+                    printf ("%s", buffer);
+                    p++;
+                }
+                j++;
+            }
+        }
+    }
     free(All_Words);
-
-
 }  
 
 //Function to read a word and allocate it to the structure 'word'
@@ -184,108 +221,37 @@ void ReadWord(FILE *fPtr1, struct Word *All_Words, int *RunningP) //arguments fo
     }
 }
 
-int NewLine(int *RunningP, float scale, const int X_Limit, int *X_GlobalOffset, int line)
+int NewLine(int *RunningP, float scale, const int X_Limit, int *XPtr, int line)
 {
-    int lenth = *RunningP * Scale;  
+    int length = *RunningP * scale;  
     if (length > X_Limit)
     {
-        *X_GlobalOffset = 0;
-        Line++;
-        return Line;
+        *XPtr = 0;
+        line++;
+        return line;
     } 
 }
 
-    /*
 
-    //Function to work out how many characters are in a word
-    int CountCharacters(FILE *fPtr1)
-    {
-        char ch;
-        int CharCount = 0;
-        while((ch = fgetc(fPtr1)) != EOF)
-        {
-            if (ch != ' ' || ch != '\n' || ch !='\t')
-            {
-                CharCount++;
-            }
-        }
-        return CharCount++; //Could move the character count to the next word, the return that for the next word
-    }
+float x_coordinate(int *XPtr, int user_scale, int j, struct line *all_lines, int p, float X_local)
+{
+    *XPtr = user_scale * j;
+    X_local = *XPtr + (all_lines[p].a0);
+    //printf("%f  %d   %f\n", all_lines[p].a0, *XPtr, X_local);
+    return X_local;
+}
 
-    rewind(fPtr1);
-
-    int CharCount = CountCharacters(fPtr1);
-    printf("%d\n", WordCount);
-    printf("%d\n", CharCount);
-
-    struct words
-    {
-        char word[CharCount];
-    };
-
-
-    struct words all_words[WordCount];
-
-    //Function to add characters to each array
-    /*for (l = 0; l < CharCount; l++)
-    {
-        while((ch = fgetc(fPtr1)) != EOF)
-        {
-            all_words[].word = ch;
-        }
-    }*/
-
-
-
-    //function to store characters from a word into the allocated memory
-
-
-
-    
-    /*
-    char *WordArray = NULL;
-    int Starting_Size = 1;
-    int Changing_Size = 2;
-    int *Start = &Starting_Size;
-    int *Change = &Changing_Size;  
-
-    WordArray = (char *)calloc(*Start, sizeof(char));
-
-    if (WordArray == NULL)
-    {
-        printf("\nUnable to allocate the memory requested");
-        printf("\n  ** Program terminating ** \n");
-        exit (1);
-    }
-    struct words
-    {
-        WordArray[]   
-    }
-} 
-*/
-
-
-    
-    
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+float y_coordinate(int *YPtr, int user_scale, int line, int line_spacing, struct line *all_lines, int p, float Y_local)
+{
+    *YPtr = 0 - user_scale - (user_scale * line) - (line_spacing * line);      //Works out global Y coordinate
+    Y_local = *YPtr + (all_lines[p].a1);
+    //printf("%f  %d   %f\n", all_lines[p].a1, *YPtr, Y_local);
+    return Y_local;
+}
 
 /*
 
-        //These commands get the robot into 'ready to draw mode' and need to be sent before any writing commands
+    //These commands get the robot into 'ready to draw mode' and need to be sent before any writing commands
     sprintf (buffer, "G1 X0 Y0 F1000\n");
     SendCommands(buffer);
     sprintf (buffer, "M3\n");
