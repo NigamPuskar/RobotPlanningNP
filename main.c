@@ -24,7 +24,7 @@ struct line
     int a2;     //holds the value of whether the pen is up or down
 };
 
-void ReadWord(FILE *fPtr1, struct Word *All_Words, int *RunningP);  //Function prototype for the 'ReadWord' function
+void ReadWord(FILE *fPtr1, struct Word *All_Words, int *RunningP, int word);  //Function prototype for the 'ReadWord' function
 
 int NewLine(int *RunningP, float scale, const int X_Limit, int *XPtr, int line);   //Function prototype for the 'Newline' function 
 
@@ -157,39 +157,49 @@ int main()
     float Y_local = 0;
     int line_spacing = 5;   //Spacing between each line of characters
 
-    All_Words->characters = NULL;
-    ReadWord(fPtr1, &All_Words[0], &Running_CharCount);
+    
+    for (int i = 0; i < WordCount; i++) 
+    {
+        All_Words[i].characters = NULL;
+    }
+    
     NewLine(RunningP, scale, X_Limit, &X_GlobalOffset, line);
     printf("%s", All_Words->characters);
 
     printf("%f\n", all_lines[0].a0);
 
-    for (int w = 0; All_Words->characters[w] != '\0'; w++ )
+    for (int word = 0; word <= WordCount; word++)
     {
-        for (p = 0; p <= SingleStrokeFont_NumberOfRows; p++)
+        ReadWord(fPtr1, &All_Words[word], &Running_CharCount, word);
+
+        for (int w = 0; All_Words[word].characters[w] != '\0'; w++ )
         {
-            if (all_lines[p].a0 == 999 && all_lines[p].a1 == All_Words->characters[w])
+            for (p = 0; p <= SingleStrokeFont_NumberOfRows; p++)
             {
-                p++;
-                while (all_lines[p].a0 != 999)
+                if (all_lines[p].a0 == 999 && all_lines[p].a1 == All_Words[word].characters[w])
                 {
-                    //printf("Calling x_coordinate for p = %d\n", p);  // Debug log
-                    float x_local = x_coordinate(&X_GlobalOffset, user_scale, j, all_lines, p, X_local);
-                    float y_local = y_coordinate(&Y_GlobalOffset, user_scale, line, line_spacing, all_lines, p, Y_local);
-                    snprintf(buffer, 100, "G%d X%f Y%f\n", all_lines[p].a2, x_local, y_local);
-                    //SendCommands(buffer);
-                    printf ("%s", buffer);
                     p++;
+                    while (all_lines[p].a0 != 999)
+                    {
+                        //printf("Calling x_coordinate for p = %d\n", p);  // Debug log
+                        float x_local = x_coordinate(&X_GlobalOffset, user_scale, j, all_lines, p, X_local);
+                        float y_local = y_coordinate(&Y_GlobalOffset, user_scale, line, line_spacing, all_lines, p, Y_local);
+                        snprintf(buffer, 100, "G%d X%f Y%f\n", all_lines[p].a2, x_local, y_local);
+                        //SendCommands(buffer);
+                        printf ("%s", buffer);
+                        p++;
+                    }
+                    j++;
                 }
-                j++;
             }
         }
     }
+    
     free(All_Words);
 }  
 
 //Function to read a word and allocate it to the structure 'word'
-void ReadWord(FILE *fPtr1, struct Word *All_Words, int *RunningP) //arguments for the function
+void ReadWord(FILE *fPtr1, struct Word *All_Words, int *RunningP, int word) //arguments for the function
 { 
     int charCount = 0;  //initialises character count to 0
     char temp[50];  //temporary array used to store the characters, which will be copied to the array in '*characters'
@@ -209,15 +219,26 @@ void ReadWord(FILE *fPtr1, struct Word *All_Words, int *RunningP) //arguments fo
                 (*RunningP)++;   //Increments the running count value by 1 for spaces
             }
             temp[charCount] = '\0'; //append the temp array with a null terminator (used to copy the string in temp into the 'All_words.characters array)
-            All_Words->characters = (char *)malloc((strlen(temp) + 1) * sizeof(char));    //dynamically allocate memory to the characters array
-                if (All_Words->characters == NULL)    //Execute if statement that exits the if loop if there's not sufficient memory
+            All_Words[word].characters = (char *)malloc((strlen(temp) + 1) * sizeof(char));    //dynamically allocate memory to the characters array
+                if (All_Words[word].characters == NULL)    //Execute if statement that exits the if loop if there's not sufficient memory
                 {
                     printf("ERROR ALLOCATING MEMORY!\n");
                     exit(1);
                 }
-            strcpy(All_Words->characters, temp);  //copies the contents of the temp array to the strucuture all_words.characters
+            strcpy(All_Words[word].characters, temp);  //copies the contents of the temp array to the strucuture all_words.characters
             return;
         }
+    }
+    if (charCount > 0) 
+    { 
+        temp[charCount] = '\0';  // Null-terminate the temp array
+        All_Words[word].characters = (char *)malloc((strlen(temp) + 1) * sizeof(char));
+        if (All_Words[word].characters == NULL) 
+        { 
+            printf("ERROR ALLOCATING MEMORY!\n");
+            exit(1);
+        }
+        strcpy(All_Words[word].characters, temp);  // Copy temp to the structure
     }
 }
 
