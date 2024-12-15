@@ -26,7 +26,7 @@ struct line
 
 void ReadWord(FILE *fPtr1, struct Word *All_Words, int *RunningP, int word, int WordCount);  //Function prototype for the 'ReadWord' function
 
-int NewLine(int *RunningP, float scale, const int X_Limit, int *XPtr, int line);   //Function prototype for the 'Newline' function 
+int NewLine(int *RunningP, float user_scale, const int X_Limit, int *XPtr, int line);   //Function prototype for the 'Newline' function 
 
 float x_coordinate(int *XPtr, int user_scale, int j, struct line *all_lines, int p, float X_local);     //Function prototype for the 'X_coordinate' function 
 
@@ -136,7 +136,7 @@ int main()
 
     rewind(fPtr1);  //Resets the file position to the beginning of the file 
 
-    printf("%d", WordCount);
+    //printf("%d", WordCount);
 
     struct Word All_Words[WordCount];  //creates an array of structures, with the amount of structures equalling the wordcount
     //printf("%s", All_Words[0].characters);
@@ -160,7 +160,7 @@ int main()
     int line_spacing = 5;   //Spacing between each line of characters
 
     
-    for (int i = 0; i < WordCount; i++) 
+    for (int i = 0; i <= WordCount; i++) 
     {
         All_Words[i].characters = NULL;  // Initialize the characters pointer to NULL
 
@@ -175,16 +175,17 @@ int main()
         }
     }
     
-    NewLine(RunningP, scale, X_Limit, &X_GlobalOffset, line);
+    //NewLine(RunningP, scale, X_Limit, &X_GlobalOffset, line);
     //printf("%s", All_Words->characters);
 
     printf("%f\n", all_lines[0].a0);
 
-    for (int word = 0; word < WordCount; word++)
+    for (int word = 0; word <= WordCount; word++)
     {
         //printf("After strcpy: All_Words[%d].characters = '%s'\n", word, All_Words[word].characters);
         ReadWord(fPtr1, All_Words, &Running_CharCount, word, WordCount);
         //printf("In main: All_Words[%d].characters = %p, contents = %s\n", word, (void *)All_Words[word].characters, All_Words[word].characters);
+        NewLine(&Running_CharCount, user_scale, X_Limit, XPtr, line);
         for (int w = 0; All_Words[word].characters[w] != '\0'; w++ ) //Does it reach that?
         {
             if (All_Words[word].characters == NULL) 
@@ -232,51 +233,56 @@ void ReadWord(FILE *fPtr1, struct Word *All_Words, int *RunningP, int word, int 
         }
         else //If there's a space, new line or tab, execute the else if statement
         {
-            if (charCount > 0)
+            if (charCount >= sizeof(temp) - 1) 
             {
-                if (charCount >= sizeof(temp) - 1) 
-                {
-                    printf("Error: Word too long, exceeding buffer size!\n");
-                    exit(1);
-                }   
-                
-                if (word >= WordCount) 
-                {
-                    printf("Word index out of bounds: %d\n", word);
-                    exit(1);
-                }
-                temp[charCount] = '\0'; //append the temp array with a null terminator (used to copy the string in temp into the 'All_words.characters array)
-                if (All_Words[word].characters != NULL) 
-                {
-                    //free(All_Words[word].characters);
-                    All_Words[word].characters = NULL;
-                }
-                //printf("Before allocation: All_Words[%d].characters = %p\n", word, (void *)All_Words[word].characters);
-                //printf("befre allocation : All_Words[%d].characters = '%s'\n", word, All_Words[word].characters);
-                All_Words[word].characters = (char *)malloc((strlen(temp) + 1) * sizeof(char));    //dynamically allocate memory to the characters array 
-                //printf("After allocation: All_Words[%d].characters = %p\n", word, (void *)All_Words[word].characters);
-                //printf("after allocation : All_Words[%d].characters = '%s'\n", word, All_Words[word].characters);
-                if (All_Words[word].characters == NULL)    //Execute if statement that exits the if loop if there's not sufficient memory
-                {
-                    printf("ERROR ALLOCATING MEMORY!\n");
-                    exit(1);
-                }
-                //printf("temp length: %zu\n", strlen(temp));
-                //printf("Before strcpy: temp = '%s'\n", temp);
-                strcpy(All_Words[word].characters, temp);  //copies the contents of the temp array to the strucuture all_words.characters
-                //printf("After allocation: All_Words[%d].characters = %p\n", word, (void *)All_Words[word].characters);
-                //printf("After strcpy: All_Words[%d].characters = '%s'\n", word, All_Words[word].characters);
-                (*RunningP)++;     //increments the running count value by 1
-                //printf("word index: %d, WordCount: %d\n", word, WordCount);
-                return;
+                printf("Error: Word too long, exceeding buffer size!\n");
+                exit(1);
+            }   
+            
+            if (word >= WordCount) 
+            {
+                printf("Word index out of bounds: %d\n", word);
+                exit(1);
             }
-            if (ch == ' ') 
+            temp[charCount] = ch;
+            charCount++;    //increment the character count by 1
+            temp[charCount] = '\0'; //append the temp array with a null terminator (used to copy the string in temp into the 'All_words.characters array)
+            
+            /*if (All_Words[word].characters != NULL) 
+            {
+                //free(All_Words[word].characters);
+                All_Words[word].characters = NULL;
+            }*/
+
+            //printf("Before allocation: All_Words[%d].characters = %p\n", word, (void *)All_Words[word].characters);
+            //printf("befre allocation : All_Words[%d].characters = '%s'\n", word, All_Words[word].characters);
+            All_Words[word].characters = (char *)malloc((strlen(temp) + 1) * sizeof(char));    //dynamically allocate memory to the characters array 
+            //printf("After allocation: All_Words[%d].characters = %p\n", word, (void *)All_Words[word].characters);
+            //printf("after allocation : All_Words[%d].characters = '%s'\n", word, All_Words[word].characters);
+            if (All_Words[word].characters == NULL)    //Execute if statement that exits the if loop if there's not sufficient memory
+            {
+                printf("ERROR ALLOCATING MEMORY!\n");
+                exit(1);
+            }
+            //printf("temp length: %zu\n", strlen(temp));
+            //printf("Before strcpy: temp = '%s'\n", temp);
+            strcpy(All_Words[word].characters, temp);  //copies the contents of the temp array to the strucuture all_words.characters
+            //printf("After allocation: All_Words[%d].characters = %p\n", word, (void *)All_Words[word].characters);
+            //printf("After strcpy: All_Words[%d].characters = '%s'\n", word, All_Words[word].characters);
+            //(*RunningP)++;     //increments the running count value by 1
+            //printf("word index: %d, WordCount: %d\n", word, WordCount);
+            return;
+        }
+            /*if (ch == ' ') 
             {
                 (*RunningP)++;  // Increment running position for spaces
             
             }
-        }
-        
+            if (ch == '\t') 
+            {
+                (*RunningP)+=2;  // Increment running position for tab
+            
+            }*/
     }
     if (charCount > 0) 
     { 
@@ -291,12 +297,14 @@ void ReadWord(FILE *fPtr1, struct Word *All_Words, int *RunningP, int word, int 
     }
 }
 
-int NewLine(int *RunningP, float scale, const int X_Limit, int *XPtr, int line)
+int NewLine(int *RunningP, float user_scale, const int X_Limit, int *XPtr, int line)
 {
-    int length = *RunningP * scale;  
+    int length = (*RunningP) * user_scale;  //float to int????
+    printf("length is %d\n", length);
     if (length > X_Limit)
     {
         *XPtr = 0;
+        *RunningP = 0;
         line++;
         return line;
     } 
