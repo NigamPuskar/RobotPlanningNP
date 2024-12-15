@@ -24,7 +24,7 @@ struct line
     int a2;     //holds the value of whether the pen is up or down
 };
 
-void ReadWord(FILE *fPtr1, struct Word *All_Words, int *RunningP, int word);  //Function prototype for the 'ReadWord' function
+void ReadWord(FILE *fPtr1, struct Word *All_Words, int *RunningP, int word, int WordCount);  //Function prototype for the 'ReadWord' function
 
 int NewLine(int *RunningP, float scale, const int X_Limit, int *XPtr, int line);   //Function prototype for the 'Newline' function 
 
@@ -136,6 +136,8 @@ int main()
 
     rewind(fPtr1);  //Resets the file position to the beginning of the file 
 
+    printf("%d", WordCount);
+
     struct Word All_Words[WordCount];  //creates an array of structures, with the amount of structures equalling the wordcount
     //printf("%s", All_Words[0].characters);
   
@@ -160,20 +162,36 @@ int main()
     
     for (int i = 0; i < WordCount; i++) 
     {
-        All_Words[i].characters = NULL;
+        All_Words[i].characters = NULL;  // Initialize the characters pointer to NULL
+
+        // Check if the characters pointer is NULL and print the result
+        if (All_Words[i].characters == NULL) 
+        {
+            printf("All_Words[%d].characters is NULL\n", i);
+        } 
+        else 
+        {
+            printf("All_Words[%d].characters is NOT NULL\n", i);
+        }
     }
     
     NewLine(RunningP, scale, X_Limit, &X_GlobalOffset, line);
-    printf("%s", All_Words->characters);
+    //printf("%s", All_Words->characters);
 
     printf("%f\n", all_lines[0].a0);
 
-    for (int word = 0; word <= WordCount; word++)
+    for (int word = 0; word < WordCount; word++)
     {
-        ReadWord(fPtr1, &All_Words[word], &Running_CharCount, word);
-
-        for (int w = 0; All_Words[word].characters[w] != '\0'; w++ )
+        //printf("After strcpy: All_Words[%d].characters = '%s'\n", word, All_Words[word].characters);
+        ReadWord(fPtr1, All_Words, &Running_CharCount, word, WordCount);
+        //printf("In main: All_Words[%d].characters = %p, contents = %s\n", word, (void *)All_Words[word].characters, All_Words[word].characters);
+        for (int w = 0; All_Words[word].characters[w] != '\0'; w++ ) //Does it reach that?
         {
+            if (All_Words[word].characters == NULL) 
+            {
+                printf("Error: All_Words[%d].characters is NULL\n", word);
+                continue;
+            }
             for (p = 0; p <= SingleStrokeFont_NumberOfRows; p++)
             {
                 if (all_lines[p].a0 == 999 && all_lines[p].a1 == All_Words[word].characters[w])
@@ -199,10 +217,10 @@ int main()
 }  
 
 //Function to read a word and allocate it to the structure 'word'
-void ReadWord(FILE *fPtr1, struct Word *All_Words, int *RunningP, int word) //arguments for the function
+void ReadWord(FILE *fPtr1, struct Word *All_Words, int *RunningP, int word, int WordCount) //arguments for the function
 { 
     int charCount = 0;  //initialises character count to 0
-    char temp[50];  //temporary array used to store the characters, which will be copied to the array in '*characters'
+    char temp[50] = {0};  //temporary array used to store the characters, which will be copied to the array in '*characters'
     char ch;    
     while((ch = fgetc(fPtr1)) != EOF)   //Goes through each character in the text file that 'fPtr1' is pointing at
     {
@@ -212,22 +230,53 @@ void ReadWord(FILE *fPtr1, struct Word *All_Words, int *RunningP, int word) //ar
             charCount++;    //increment the character count by 1
             (*RunningP)++;     //increments the running count value by 1
         }
-        else if (ch == ' ' || ch == '\n' || ch =='\t') //If there's a space, new line or tab, execute the else if statement
+        else //If there's a space, new line or tab, execute the else if statement
         {
-            if (ch == ' ')
+            if (charCount > 0)
             {
-                (*RunningP)++;   //Increments the running count value by 1 for spaces
-            }
-            temp[charCount] = '\0'; //append the temp array with a null terminator (used to copy the string in temp into the 'All_words.characters array)
-            All_Words[word].characters = (char *)malloc((strlen(temp) + 1) * sizeof(char));    //dynamically allocate memory to the characters array
+                if (charCount >= sizeof(temp) - 1) 
+                {
+                    printf("Error: Word too long, exceeding buffer size!\n");
+                    exit(1);
+                }   
+                
+                if (word >= WordCount) 
+                {
+                    printf("Word index out of bounds: %d\n", word);
+                    exit(1);
+                }
+                temp[charCount] = '\0'; //append the temp array with a null terminator (used to copy the string in temp into the 'All_words.characters array)
+                if (All_Words[word].characters != NULL) 
+                {
+                    //free(All_Words[word].characters);
+                    All_Words[word].characters = NULL;
+                }
+                //printf("Before allocation: All_Words[%d].characters = %p\n", word, (void *)All_Words[word].characters);
+                //printf("befre allocation : All_Words[%d].characters = '%s'\n", word, All_Words[word].characters);
+                All_Words[word].characters = (char *)malloc((strlen(temp) + 1) * sizeof(char));    //dynamically allocate memory to the characters array 
+                //printf("After allocation: All_Words[%d].characters = %p\n", word, (void *)All_Words[word].characters);
+                //printf("after allocation : All_Words[%d].characters = '%s'\n", word, All_Words[word].characters);
                 if (All_Words[word].characters == NULL)    //Execute if statement that exits the if loop if there's not sufficient memory
                 {
                     printf("ERROR ALLOCATING MEMORY!\n");
                     exit(1);
                 }
-            strcpy(All_Words[word].characters, temp);  //copies the contents of the temp array to the strucuture all_words.characters
-            return;
+                //printf("temp length: %zu\n", strlen(temp));
+                //printf("Before strcpy: temp = '%s'\n", temp);
+                strcpy(All_Words[word].characters, temp);  //copies the contents of the temp array to the strucuture all_words.characters
+                //printf("After allocation: All_Words[%d].characters = %p\n", word, (void *)All_Words[word].characters);
+                //printf("After strcpy: All_Words[%d].characters = '%s'\n", word, All_Words[word].characters);
+                (*RunningP)++;     //increments the running count value by 1
+                //printf("word index: %d, WordCount: %d\n", word, WordCount);
+                return;
+            }
+            if (ch == ' ') 
+            {
+                (*RunningP)++;  // Increment running position for spaces
+            
+            }
         }
+        
     }
     if (charCount > 0) 
     { 
