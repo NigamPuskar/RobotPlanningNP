@@ -26,9 +26,9 @@ struct line
 
 void ReadWord(FILE *fPtr1, struct Word *All_Words, int *RunningP, int word, int WordCount);  //Function prototype for the 'ReadWord' function
 
-int NewLine(int *RunningP, float user_scale, const int X_Limit, int *XPtr, int line);   //Function prototype for the 'Newline' function 
+int NewLine(int *RunningP, float user_scale, const int X_Limit, int *XPtr, int line, int *characterPtr);   //Function prototype for the 'Newline' function 
 
-float x_coordinate(int *XPtr, int user_scale, int j, struct line *all_lines, int p, float X_local);     //Function prototype for the 'X_coordinate' function 
+float x_coordinate(int *XPtr, int user_scale, int *characterPtr, struct line *all_lines, int p, float X_local);     //Function prototype for the 'X_coordinate' function 
 
 float y_coordinate(int *YPtr, int user_scale, int line, int line_spacing, struct line *all_lines, int p, float Y_local);  //Function prototype for the'Y_coordinate function'
 
@@ -146,6 +146,10 @@ int main()
     int Running_CharCount = 0;  //initalises a running character count variable
     int *RunningP = &Running_CharCount;     //pointer to the memory address of the running char count variable
     const int X_Limit = 100;   //
+
+    int character_position = 0;
+    int *characterPtr = &character_position;
+    
     
     int X_GlobalOffset = 0;
     int *XPtr = &X_GlobalOffset;
@@ -185,7 +189,7 @@ int main()
         //printf("After strcpy: All_Words[%d].characters = '%s'\n", word, All_Words[word].characters);
         ReadWord(fPtr1, All_Words, &Running_CharCount, word, WordCount);
         //printf("In main: All_Words[%d].characters = %p, contents = %s\n", word, (void *)All_Words[word].characters, All_Words[word].characters);
-        NewLine(&Running_CharCount, user_scale, X_Limit, XPtr, line);
+        NewLine(&Running_CharCount, user_scale, X_Limit, XPtr, line, &character_position);
         for (int w = 0; All_Words[word].characters[w] != '\0'; w++ ) //Does it reach that?
         {
             if (All_Words[word].characters == NULL) 
@@ -201,14 +205,14 @@ int main()
                     while (all_lines[p].a0 != 999)
                     {
                         //printf("Calling x_coordinate for p = %d\n", p);  // Debug log
-                        float x_local = x_coordinate(&X_GlobalOffset, user_scale, j, all_lines, p, X_local);
+                        float x_local = x_coordinate(&X_GlobalOffset, user_scale, &character_position, all_lines, p, X_local);
                         float y_local = y_coordinate(&Y_GlobalOffset, user_scale, line, line_spacing, all_lines, p, Y_local);
                         snprintf(buffer, 100, "G%d X%f Y%f\n", all_lines[p].a2, x_local, y_local);
                         //SendCommands(buffer);
                         printf ("%s", buffer);
                         p++;
                     }
-                    j++;
+                    (*characterPtr)++;
                 }
             }
         }
@@ -246,6 +250,16 @@ void ReadWord(FILE *fPtr1, struct Word *All_Words, int *RunningP, int word, int 
             }
             temp[charCount] = ch;
             charCount++;    //increment the character count by 1
+            if (ch == ' ') 
+            {
+                (*RunningP)++;  // Increment running position for spaces
+            
+            }
+            else if (ch == '\t') 
+            {
+                (*RunningP)+=2;  // Increment running position for tab
+            
+            }
             temp[charCount] = '\0'; //append the temp array with a null terminator (used to copy the string in temp into the 'All_words.characters array)
             
             /*if (All_Words[word].characters != NULL) 
@@ -273,16 +287,6 @@ void ReadWord(FILE *fPtr1, struct Word *All_Words, int *RunningP, int word, int 
             //printf("word index: %d, WordCount: %d\n", word, WordCount);
             return;
         }
-            /*if (ch == ' ') 
-            {
-                (*RunningP)++;  // Increment running position for spaces
-            
-            }
-            if (ch == '\t') 
-            {
-                (*RunningP)+=2;  // Increment running position for tab
-            
-            }*/
     }
     if (charCount > 0) 
     { 
@@ -297,7 +301,7 @@ void ReadWord(FILE *fPtr1, struct Word *All_Words, int *RunningP, int word, int 
     }
 }
 
-int NewLine(int *RunningP, float user_scale, const int X_Limit, int *XPtr, int line)
+int NewLine(int *RunningP, float user_scale, const int X_Limit, int *XPtr, int line, int *characterPtr)
 {
     int length = (*RunningP) * user_scale;  //float to int????
     printf("length is %d\n", length);
@@ -306,14 +310,15 @@ int NewLine(int *RunningP, float user_scale, const int X_Limit, int *XPtr, int l
         *XPtr = 0;
         *RunningP = 0;
         line++;
+        *characterPtr = 0;
         return line;
     } 
 }
 
 
-float x_coordinate(int *XPtr, int user_scale, int j, struct line *all_lines, int p, float X_local)
+float x_coordinate(int *XPtr, int user_scale, int *characterPtr, struct line *all_lines, int p, float X_local)
 {
-    *XPtr = user_scale * j;
+    *XPtr = user_scale * (*characterPtr);
     X_local = *XPtr + (all_lines[p].a0);
     //printf("%f  %d   %f\n", all_lines[p].a0, *XPtr, X_local);
     return X_local;
