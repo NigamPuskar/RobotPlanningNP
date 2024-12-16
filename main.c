@@ -8,15 +8,16 @@
 
 #define bdrate 115200               /* 115200 baud */
 
+//Function prototype to send commands to the robot
 void SendCommands (char *buffer );
 
-//Initialises structure that is used to store each word and it's characters
+//Initialises structure that is used to store each word from a text file and it's characters
 struct Word     
 {
-    char *characters;    //pointer to the character array
+    char *characters;    //pointer to dynamically store the characters array
 };
 
-//Declares a structure that will be used to store the data from the "SingleStrokeFont.txt" file
+//Initialises a structure that will be used to store the data from the "SingleStrokeFont.txt" file
 struct line
 {
     float a0;     //holds the value of the x movement
@@ -24,18 +25,16 @@ struct line
     int a2;     //holds the value of whether the pen is up or down
 };
 
-void ReadWord(int *inword_characterPtr, FILE *fPtr1, struct Word *All_Words, int *RunningP, int word, int WordCount);  //Function prototype for the 'ReadWord' function
-
-int NewLine(int *RunningP, float user_scale, const int X_Limit, int *XPtr, int line, int *characterPtr, int *inword_characterPtr);   //Function prototype for the 'Newline' function 
-
-float x_coordinate(int *XPtr, int user_scale, int *characterPtr, struct line *all_lines, int p, float X_local);     //Function prototype for the 'X_coordinate' function 
-
-float y_coordinate(int *YPtr, int user_scale, int line, int line_spacing, struct line *all_lines, int p, float Y_local);  //Function prototype for the'Y_coordinate function'
+//Function Prototypes for tasks in the program
+void ReadWord(int *inword_characterPtr, FILE *fPtr1, struct Word *All_Words, int *RunningP, int word, int WordCount);  //Function prototype to read a single word and process it
+int NewLine(int *RunningP, float user_scale, const int X_Limit, int *XPtr, int line, int *characterPtr, int *inword_characterPtr);   //Function prototype to assess whether a new line is needed 
+float x_coordinate(int *XPtr, int user_scale, int *characterPtr, struct line *all_lines, int p, float X_local);     //Function prototype to work out the X coordinate
+float y_coordinate(int *YPtr, int user_scale, int line, int line_spacing, struct line *all_lines, int p, float Y_local);  //Function prototype to work out the y coordinate
 
 int main()
 {
     
-    //char mode[]= {'8','N','1',0};
+    char mode[]= {'8','N','1',0};
     char buffer[100];
 
     // If we cannot open the port then give up immediately
@@ -60,13 +59,22 @@ int main()
     printf ("\nThe robot is now ready to draw\n");
    
 
-    //This section asks the user an input, which will be used to scale the values in the SingleStrokeFont.txt file
+    //asks the user for an input which will be used for font scaling the SingleStrokeFont.txt file
 
     float user_scale;      //Initialising variable to hold user inputted scale
-    const float default_scale = 18.0;      //scale used in the SingleStrokeFont file
+    const float default_scale = 18.0;      //default scale used in the SingleStrokeFont file
     
-    printf("Please input the scaling you would like for the font: ");
-    scanf("%f", &user_scale);       //Assigns user input to user_scale
+    do
+    {
+        printf("Please input the scaling you would like for the font (must be between 4 and 10, inclusive): ");
+        scanf("%f", &user_scale);       //Assigns user input to user_scale
+
+        if (user_scale < 4 || user_scale > 10)
+        {
+            printf("ERROR: invalid input, the scaling must be between 4 and 10. \n");
+        }
+    } while (user_scale < 4 || user_scale > 10);
+
 
     float scale = user_scale / default_scale;   //Works out correct scaling
 
