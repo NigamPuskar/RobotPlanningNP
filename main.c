@@ -24,9 +24,9 @@ struct line
     int a2;     //holds the value of whether the pen is up or down
 };
 
-void ReadWord(FILE *fPtr1, struct Word *All_Words, int *RunningP, int word, int WordCount);  //Function prototype for the 'ReadWord' function
+void ReadWord(int *inword_characterPtr, FILE *fPtr1, struct Word *All_Words, int *RunningP, int word, int WordCount);  //Function prototype for the 'ReadWord' function
 
-int NewLine(int *RunningP, float user_scale, const int X_Limit, int *XPtr, int line, int *characterPtr);   //Function prototype for the 'Newline' function 
+int NewLine(int *RunningP, float user_scale, const int X_Limit, int *XPtr, int line, int *characterPtr, int *inword_characterPtr);   //Function prototype for the 'Newline' function 
 
 float x_coordinate(int *XPtr, int user_scale, int *characterPtr, struct line *all_lines, int p, float X_local);     //Function prototype for the 'X_coordinate' function 
 
@@ -149,7 +149,9 @@ int main()
 
     int character_position = 0;
     int *characterPtr = &character_position;
-    
+
+    int inword_character_count;
+    int *inword_characterPtr = &inword_character_count;
     
     int X_GlobalOffset = 0;
     int *XPtr = &X_GlobalOffset;
@@ -187,9 +189,9 @@ int main()
     for (int word = 0; word <= WordCount; word++)
     {
         //printf("After strcpy: All_Words[%d].characters = '%s'\n", word, All_Words[word].characters);
-        ReadWord(fPtr1, All_Words, &Running_CharCount, word, WordCount);
+        ReadWord(&inword_character_count, fPtr1, All_Words, &Running_CharCount, word, WordCount);
         //printf("In main: All_Words[%d].characters = %p, contents = %s\n", word, (void *)All_Words[word].characters, All_Words[word].characters);
-        NewLine(&Running_CharCount, user_scale, X_Limit, XPtr, line, &character_position);
+        line = NewLine(&Running_CharCount, user_scale, X_Limit, XPtr, line, &character_position, &inword_character_count);
         for (int w = 0; All_Words[word].characters[w] != '\0'; w++ ) //Does it reach that?
         {
             if (All_Words[word].characters == NULL) 
@@ -222,22 +224,22 @@ int main()
 }  
 
 //Function to read a word and allocate it to the structure 'word'
-void ReadWord(FILE *fPtr1, struct Word *All_Words, int *RunningP, int word, int WordCount) //arguments for the function
+void ReadWord(int *inword_characterPtr, FILE *fPtr1, struct Word *All_Words, int *RunningP, int word, int WordCount) //arguments for the function
 { 
-    int charCount = 0;  //initialises character count to 0
+    *inword_characterPtr = 0;  //initialises character count to 0
     char temp[50] = {0};  //temporary array used to store the characters, which will be copied to the array in '*characters'
     char ch;    
     while((ch = fgetc(fPtr1)) != EOF)   //Goes through each character in the text file that 'fPtr1' is pointing at
     {
         if (ch != ' ' && ch != '\n' && ch !='\t')      //If there isn't a space, new line or tab, execute the if statement
         {
-            temp[charCount] = ch;   //Add the character to the temp array
-            charCount++;    //increment the character count by 1
+            temp[*inword_characterPtr] = ch;   //Add the character to the temp array
+            (*inword_characterPtr)++;    //increment the character count by 1
             (*RunningP)++;     //increments the running count value by 1
         }
         else //If there's a space, new line or tab, execute the else if statement
         {
-            if (charCount >= sizeof(temp) - 1) 
+            if (*inword_characterPtr >= sizeof(temp) - 1) 
             {
                 printf("Error: Word too long, exceeding buffer size!\n");
                 exit(1);
@@ -248,8 +250,8 @@ void ReadWord(FILE *fPtr1, struct Word *All_Words, int *RunningP, int word, int 
                 printf("Word index out of bounds: %d\n", word);
                 exit(1);
             }
-            temp[charCount] = ch;
-            charCount++;    //increment the character count by 1
+            temp[*inword_characterPtr] = ch;
+            (*inword_characterPtr)++;    //increment the character count by 1
             if (ch == ' ') 
             {
                 (*RunningP)++;  // Increment running position for spaces
@@ -260,7 +262,7 @@ void ReadWord(FILE *fPtr1, struct Word *All_Words, int *RunningP, int word, int 
                 (*RunningP)+=2;  // Increment running position for tab
             
             }
-            temp[charCount] = '\0'; //append the temp array with a null terminator (used to copy the string in temp into the 'All_words.characters array)
+            temp[*inword_characterPtr] = '\0'; //append the temp array with a null terminator (used to copy the string in temp into the 'All_words.characters array)
             
             /*if (All_Words[word].characters != NULL) 
             {
@@ -288,9 +290,9 @@ void ReadWord(FILE *fPtr1, struct Word *All_Words, int *RunningP, int word, int 
             return;
         }
     }
-    if (charCount > 0) 
+    if (*inword_characterPtr > 0) 
     { 
-        temp[charCount] = '\0';  // Null-terminate the temp array
+        temp[*inword_characterPtr] = '\0';  // Null-terminate the temp array
         All_Words[word].characters = (char *)malloc((strlen(temp) + 1) * sizeof(char));
         if (All_Words[word].characters == NULL) 
         { 
@@ -301,18 +303,21 @@ void ReadWord(FILE *fPtr1, struct Word *All_Words, int *RunningP, int word, int 
     }
 }
 
-int NewLine(int *RunningP, float user_scale, const int X_Limit, int *XPtr, int line, int *characterPtr)
+int NewLine(int *RunningP, float user_scale, const int X_Limit, int *XPtr, int line, int *characterPtr, int *inword_characterPtr)
 {
     int length = (*RunningP) * user_scale;  //float to int????
-    printf("length is %d\n", length);
+    //printf("length is %d\n", length);
     if (length > X_Limit)
     {
         *XPtr = 0;
-        *RunningP = 0;
+        *RunningP = *inword_characterPtr;
         line++;
         *characterPtr = 0;
+        //int length2 = (*RunningP) * user_scale;
+        //printf("length AFTER resetting %d\n", length2);
         return line;
     } 
+    return line;
 }
 
 
