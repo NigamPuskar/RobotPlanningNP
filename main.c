@@ -13,14 +13,14 @@ void SendCommands (char *buffer );
 
 
 //Initialises structure that is used to store each word from a text file and it's characters
-struct Word     
+struct single_word     
 {
     char *characters;    //pointer to dynamically store the characters array
 };
 
 
 //Initialises a structure that will be used to store the data from the "SingleStrokeFont.txt" file
-struct line
+struct SSF_char
 {
     float a0;     //holds the value of the x movement
     float a1;     //holds the value of the y movement
@@ -28,10 +28,10 @@ struct line
 };
 
 //Function Prototypes for tasks in the program
-void ReadWord(int *inword_characterPtr, FILE *fPtr1, struct Word *All_Words, int *runningP, int word, int WordCount);  //Function prototype to read a single word and process it
-int NewLine(int *runningP, float user_scale, const int X_Limit, int *XPtr, int line, int *characterPtr, int *inword_characterPtr);   //Function prototype to assess whether a new line is needed 
-float x_coordinate(int *XPtr, int user_scale, int *characterPtr, struct line *all_lines, int p, float X_local);     //Function prototype to work out the X coordinate
-float y_coordinate(int *YPtr, int user_scale, int line, const int line_spacing, struct line *all_lines, int p, float Y_local);  //Function prototype to work out the y coordinate
+void ReadWord(int *inword_characterPtr, FILE *fPtr1, struct single_word *all_words, int *runningPtr, int word, int WordCount);  //Function prototype to read a single word and process it
+int NewLine(int *runningPtr, float user_scale, const int X_Limit, int *XPtr, int line, int *characterPtr, int *inword_characterPtr);   //Function prototype to assess whether a new line is needed 
+float x_coordinate(int *XPtr, int user_scale, int *characterPtr, struct SSF_char *SSF_lines, int p, float X_local);     //Function prototype to work out the X coordinate
+float y_coordinate(int *YPtr, int user_scale, int line, const int line_spacing, struct SSF_char *SSF_lines, int p, float Y_local);  //Function prototype to work out the y coordinate
 
 
 int main()
@@ -82,7 +82,7 @@ int main()
 
     /*This section copies the data to the 'line' structure, where it is multiplied by the scaling values 
     for the relevant x and y movements*/  //MENTIONED LINE????
-    int SingleStrokeFont_NumberOfRows = 1027; //total number of rows (as said in the project brief document) used to work out the number of structural arrays
+    int SSF_NumberOfRows = 1027; //total number of rows (as said in the project brief document) used to work out the number of structural arrays
     
     FILE *fPtr; //Assigns a pointer to the file 
     fPtr = fopen("SingleStrokeFont.txt", "r" );  //Opens the SingleStrokeFont file in read only
@@ -90,32 +90,32 @@ int main()
     //This checks whether the file was openend correctly or not, if it wasn't then the program will exit
     if (fPtr == NULL) 
     {
-        printf("ERROR: Could not open \"SingleStrokeFont!!\"");
+        printf("ERROR: Could not open \"SingleStrokeFont!\"");
         exit(1);
     }
 
 
-    struct line all_lines[SingleStrokeFont_NumberOfRows]; //Defines a structural array which will contain each line of the SingleStrokeFont file 
+    struct SSF_char SSF_lines[SSF_NumberOfRows]; //Defines a structural array which will contain each line of the SingleStrokeFont file 
     
-
+    
     //The for loop iterates over the structural array and copies the values from the SingleStrokFont file to it
-    for (int i = 0; i < SingleStrokeFont_NumberOfRows; i++)
+    for (int i = 0; i < SSF_NumberOfRows; i++)
     {
         int temp_a0, temp_a1, temp_a2;  //Declares temporary variables used to store float versions of the data from SingleStrokeFont
         fscanf(fPtr,"%d %d %d", &temp_a0, &temp_a1, &temp_a2); //reads each value (seperated by a space) and copies it to the corresponding value in the 'lines' struct
         
         if (temp_a0 != 999)     //If NOT a0 (therefore working with the lines inbetween 999 - the x and y coordinates), execute the code inside the if statement:
         {
-            all_lines[i].a0 = (float)temp_a0 * scale;   //assign the line struct values to the scaled SingleStrokeFont data (x coordinates)
-            all_lines[i].a1 = (float)temp_a1 * scale;   //assign the line struct values to the scaled SingleStrokeFont data (y coordinates)
+            SSF_lines[i].a0 = (float)temp_a0 * scale;   //assign the SSF_char struct values to the scaled SingleStrokeFont data (x coordinates)
+            SSF_lines[i].a1 = (float)temp_a1 * scale;   //assign the SSF_char struct values to the scaled SingleStrokeFont data (y coordinates)
         }
 
         else    //if a0 IS 999 (indicating the start of a new character), execute the code inside the else statement:
         {
-          all_lines[i].a0 = temp_a0;    //Simply assigns the value of the temp placeholder to the line struct value
-          all_lines[i].a1 = temp_a1;    //Simply assigns the value of the temp placeholder to the line struct value
+          SSF_lines[i].a0 = temp_a0;    //Simply assigns the value of the temp placeholder to the SSF_char struct value
+          SSF_lines[i].a1 = temp_a1;    //Simply assigns the value of the temp placeholder to the SSF_char struct value
         }
-        all_lines[i].a2 = temp_a2;      //Since a2 does not get affected by scaling, all elements are equated to the temp_a2 value
+        SSF_lines[i].a2 = temp_a2;      //Since a2 does not get affected by scaling, all elements are equated to the temp_a2 value
     }
     fclose(fPtr); //Closes the SingleStrokeFont file
 
@@ -148,13 +148,13 @@ int main()
     rewind(fPtr1);  //Resets the file position to the beginning of the file 
 
      //creates an array of structures to store each word from the input file
-    struct Word All_Words[WordCount];   
+    struct single_word all_words[WordCount];   
 
 
     //Initialising variables for the rest of the code and functions
     //variables to track character positioning
     int running_CharCount = 0;  //Keeps a running count of ALL characters (multiple words)
-    int *runningP = &running_CharCount;     //pointer to the running char count variable
+    int *runningPtr = &running_CharCount;     //pointer to the running char count variable
 
     int character_position = 0;  //Keeps a count of the current character position in a SINGLE word (for iterating through a word)
     int *characterPtr = &character_position;    //pointer to the character position variable
@@ -176,82 +176,89 @@ int main()
     int line = 0;   //Initialises line count (used to adjust the Y-coordinates)
     
 
-    //Loops through each word in the All_Words array to set each 'characters' pointer to NULL
+    //Loops through each word in the all_words array to set each 'characters' pointer to NULL
     for (int i = 0; i <= WordCount; i++) 
     {
-        All_Words[i].characters = NULL;  // Initialize the characters pointer to NULL
+        all_words[i].characters = NULL;  // Initialize the characters pointer to NULL
 
         // Check if the characters pointer is NULL and print the result
-        if (All_Words[i].characters == NULL) 
+        if (all_words[i].characters == NULL) 
         {
-            printf("All_Words[%d].characters is NULL\n", i);
+            printf("all_words[%d].characters is NULL\n", i);
         } 
         else 
         {
-            printf("All_Words[%d].characters is NOT NULL\n", i);
+            printf("all_words[%d].characters is NOT NULL\n", i);
         }
     }
 
     
     //These commands get the robot into 'ready to draw mode' and need to be sent before any writing commands
-    sprintf (buffer, "G1 X0 Y0 F1000\n");
+    /*sprintf (buffer, "G1 X0 Y0 F1000\n");
     SendCommands(buffer);
     sprintf (buffer, "M3\n");
     SendCommands(buffer);
     sprintf (buffer, "S0\n");
-    SendCommands(buffer);
+    SendCommands(buffer);*/
 
     /*For loop used to print out the G-Code for each character movement. The array reads in a single word,
     decides if it's within the x-axis width limit then loops through the characters in the 
-    all_words.characters array. It then scans the all_lines struct for the specific character movements
+    all_words.characters array. It then scans the SSF_lines struct for the specific character movements
     corresponding to the current letter, and outputs it.*/
 
     //Processes each word in the all_words array, word by word
     for (int word = 0; word <= WordCount; word++)   
     {
-        ReadWord(&inword_CharCount, fPtr1, All_Words, &running_CharCount, word, WordCount);  //Reads a word from the text file and updates the all_words[word].characters array
+        ReadWord(&inword_CharCount, fPtr1, all_words, &running_CharCount, word, WordCount);  //Reads a word from the text file and updates the all_words[word].characters array
 
         line = NewLine(&running_CharCount, user_scale, X_Limit, XPtr, line, &character_position, &inword_CharCount);  //Determines whether a newline is needed or not 
         
         //Loops through each character in a word
-        for (int w = 0; All_Words[word].characters[w] != '\0'; w++ ) 
+        for (int w = 0; all_words[word].characters[w] != '\0'; w++ ) 
         {
             //Checks if the character array is NULL, and prints an error message
-            if (All_Words[word].characters == NULL) 
+            if (all_words[word].characters == NULL) 
             {
-                printf("ERROR: All_Words[%d].characters is NULL\n", word);
+                printf("ERROR: all_words[%d].characters is NULL\n", word);
                 continue;   //Skip to the next iteration of the character array is NULL
             }
             //iterates through each line of the 'SingleStrokeFont' file to get the character movements
-            for (int p = 0; p <= SingleStrokeFont_NumberOfRows; p++)
+            for (int p = 0; p <= SSF_NumberOfRows; p++)
             {
                 //Checks in between each a0 == 999 and a1 == current character value to find the character movements
-                if (all_lines[p].a0 == 999 && all_lines[p].a1 == All_Words[word].characters[w])
+                if (SSF_lines[p].a0 == 999 && SSF_lines[p].a1 == all_words[word].characters[w])
                 {
                     p++;    //Moves to the line after a0 == 999 to access character movement data
                     //While the line is inbetween 999 (i.e. while it doesn't indicate the end of the character movements of a letter)
-                    while (all_lines[p].a0 != 999)
+                    while (SSF_lines[p].a0 != 999)
                     {
                         //Calls functions to calculate character movement in the X and Y coordinates for each letter 
-                        float x_local = x_coordinate(&X_GlobalOffset, user_scale, &character_position, all_lines, p, X_local);   
-                        float y_local = y_coordinate(&Y_GlobalOffset, user_scale, line, line_spacing, all_lines, p, Y_local);
-                        snprintf(buffer, 100, "G%d X%f Y%f\n", all_lines[p].a2, x_local, y_local);
-                        SendCommands(buffer); //Function commented out to allow for testing on G-Code simulator
+                        float x_local = x_coordinate(&X_GlobalOffset, user_scale, &character_position, SSF_lines, p, X_local);   
+                        float y_local = y_coordinate(&Y_GlobalOffset, user_scale, line, line_spacing, SSF_lines, p, Y_local);
+                        snprintf(buffer, 100, "G%d X%f Y%f\n", SSF_lines[p].a2, x_local, y_local);
+                        //SendCommands(buffer); //Function commented out to allow for testing on G-Code simulator
                         
-                        //printf ("%s", buffer); //Prints out the G-Code to allow for tesing on G-code simulator
-                        p++;    //Moves to the next line of the all_lines structure
+                        printf ("%s", buffer); //Prints out the G-Code to allow for tesing on G-code simulator
+                        p++;    //Moves to the next line of the SSF_lines structure
                     }
                     (*characterPtr)++;  //Moves to the next character in the word
                 }
             }
         }
     }
+    snprintf(buffer, 100, "G0 X0 Y0\n");
+    printf ("%s", buffer); //Prints out the G-Code to allow for tesing on G-code simulator
+    //free(all_words);    //dynamically frees the memory located in the all_words array
     
-    free(All_Words);    //dynamically frees the memory located in the All_words array
+    // Before we exit the program we need to close the COM port
+    /*CloseRS232Port();
+    printf("Com port now closed\n");*/
+
+    return (0);
 }  
 
-//Function to read a word and allocate it to the structure 'word'
-void ReadWord(int *inword_characterPtr, FILE *fPtr1, struct Word *All_Words, int *runningP, int word, int WordCount) //arguments for the function
+//Function to read a word and allocate it to the structure 'single_word'
+void ReadWord(int *inword_characterPtr, FILE *fPtr1, struct single_word *all_words, int *runningPtr, int word, int WordCount) //arguments for the function
 { 
     *inword_characterPtr = 0;  //initialises character count to 0
     char temp[50] = {0};  //temporary array used to store the characters, which will be copied to the array in '*characters'
@@ -263,7 +270,7 @@ void ReadWord(int *inword_characterPtr, FILE *fPtr1, struct Word *All_Words, int
         {
             temp[*inword_characterPtr] = ch;   //Add the character to the temp array
             (*inword_characterPtr)++;    //increment the character count by 1
-            (*runningP)++;     //increments the running character count value by 1
+            (*runningPtr)++;     //increments the running character count value by 1
         }
         //If there's a space, new line or tab, execute the else statement
         else 
@@ -283,9 +290,9 @@ void ReadWord(int *inword_characterPtr, FILE *fPtr1, struct Word *All_Words, int
             }
 
             //If the characters array is not NULL, the if statement will declare it NULL 
-            if (All_Words[word].characters != NULL) 
+            if (all_words[word].characters != NULL) 
             {
-                All_Words[word].characters = NULL;  
+                all_words[word].characters = NULL;  
             }
 
             temp[*inword_characterPtr] = ch;    //adds a space/tab/newline to the temp array
@@ -294,29 +301,29 @@ void ReadWord(int *inword_characterPtr, FILE *fPtr1, struct Word *All_Words, int
             //Adjusts the running and character count by 1 for spaces
             if (ch == ' ') 
             {
-                (*runningP)++;  
+                (*runningPtr)++;  
                 (*inword_characterPtr)++;  
             
             }
             //Adjusts the running and character count by 4 for tabs
             else if (ch == '\t') 
             {
-                (*runningP)+=4;  
+                (*runningPtr)+=4;  
                 (*inword_characterPtr)+=4;    
             }
 
-            temp[*inword_characterPtr] = '\0'; //append the temp array with a null terminator (used to copy the string in temp into the 'All_words.characters array)
+            temp[*inword_characterPtr] = '\0'; //append the temp array with a null terminator (used to copy the string in temp into the 'all_words.characters array)
             
-            All_Words[word].characters = (char *)malloc((strlen(temp) + 1) * sizeof(char));    //dynamically allocates memory to the characters array based on the word length 
+            all_words[word].characters = (char *)malloc((strlen(temp) + 1) * sizeof(char));    //dynamically allocates memory to the characters array based on the word length 
             
             //Execute if statement that exits the if loop if there's not sufficient memory
-            if (All_Words[word].characters == NULL)  
+            if (all_words[word].characters == NULL)  
             {
                 printf("ERROR: Not enough memory allocated.\n");
                 exit(1);    //Exit if memory allocation fails
             }
 
-            strcpy(All_Words[word].characters, temp);  //copies the contents of the temp array to the strucuture all_words.characters array
+            strcpy(all_words[word].characters, temp);  //copies the contents of the temp array to the strucuture all_words.characters array
             return;     //Exits the function after processing the word
         }
     }
@@ -324,28 +331,28 @@ void ReadWord(int *inword_characterPtr, FILE *fPtr1, struct Word *All_Words, int
     if (*inword_characterPtr > 0) 
     { 
         temp[*inword_characterPtr] = '\0';  // Null-terminate the temp array
-        All_Words[word].characters = (char *)malloc((strlen(temp) + 1) * sizeof(char)); //dynamically allocates memory to the characters array based on the word length 
+        all_words[word].characters = (char *)malloc((strlen(temp) + 1) * sizeof(char)); //dynamically allocates memory to the characters array based on the word length 
         
         //Execute if statement that exits the if loop if there's not sufficient memory
-        if (All_Words[word].characters == NULL) 
+        if (all_words[word].characters == NULL) 
         { 
             printf("ERROR: Not enough memory allocated.\n");
             exit(1);    //Exit if memory allocation fails
         }
-        strcpy(All_Words[word].characters, temp);  //copies the contents of the temp array to the strucuture all_words.characters array
+        strcpy(all_words[word].characters, temp);  //copies the contents of the temp array to the strucuture all_words.characters array
         return;     //Exits the function after processing the word
     }
 }
 
 //Function that checks the current position of a word, and determines if it should go on a new line
-int NewLine(int *runningP, float user_scale, const int X_Limit, int *XPtr, int line, int *characterPtr, int *inword_characterPtr)
+int NewLine(int *runningPtr, float user_scale, const int X_Limit, int *XPtr, int line, int *characterPtr, int *inword_characterPtr)
 {  
-    int length = (*runningP) * user_scale;  //Calculates the length of a word based on the running character position and the user_scale
+    int length = (*runningPtr) * user_scale;  //Calculates the length of a word based on the running character position and the user_scale
     //Checks if the current word length is over the X limit
     if (length > X_Limit)
     {
         *XPtr = 0;      //Resets the X position (starts a new line)
-        *runningP = *inword_characterPtr;   //Updates the running character position of the new line depending on the length of the current word read
+        *runningPtr = *inword_characterPtr;   //Updates the running character position of the new line depending on the length of the current word read
         line++; //Moves the word to the next line
         *characterPtr = 0;  //Resets the character position for the new line
         return line;    //returns the incremented line number
@@ -354,18 +361,18 @@ int NewLine(int *runningP, float user_scale, const int X_Limit, int *XPtr, int l
 }
 
 //Function to calculate the X coordinate based on the scaling and current character position
-float x_coordinate(int *XPtr, int user_scale, int *characterPtr, struct line *all_lines, int p, float X_local)
+float x_coordinate(int *XPtr, int user_scale, int *characterPtr, struct SSF_char *SSF_lines, int p, float X_local)
 {
     *XPtr = user_scale * (*characterPtr);   //Scale the X position based on the user-defined scale and character position
-    X_local = *XPtr + (all_lines[p].a0);    //Add the character's offset (a0) to the scaled X position
+    X_local = *XPtr + (SSF_lines[p].a0);    //Add the character's offset (a0) to the scaled X position
     return X_local;     //Return the final local X coordinate
 }
 
 //Function to calculate the Y coordinate based on the scaling and current line
-float y_coordinate(int *YPtr, int user_scale, int line, const int line_spacing, struct line *all_lines, int p, float Y_local)
+float y_coordinate(int *YPtr, int user_scale, int line, const int line_spacing, struct SSF_char *SSF_lines, int p, float Y_local)
 {
     *YPtr = 0 - user_scale - (user_scale * line) - (line_spacing * line);      //Scale the Y position based on the user-defined scale and current line
-    Y_local = *YPtr + (all_lines[p].a1);       //Add the character's offset (a1) to the scaled Y position
+    Y_local = *YPtr + (SSF_lines[p].a1);       //Add the character's offset (a1) to the scaled Y position
     return Y_local;  //Return the final local Y coordinate
 }
 
