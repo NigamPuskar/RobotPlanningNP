@@ -28,6 +28,7 @@ struct SSF_char
 };
 
 //Function Prototypes for tasks in the program
+void scale_SSFData(FILE *fPtr, struct SSF_char *SSF_lines, int SSF_NumberOfRows, float scale);
 void ReadWord(int *inword_characterPtr, FILE *fPtr1, struct single_word *all_words, int *runningPtr, int word, int WordCount);  //Function prototype to read a single word and process it
 int NewLine(int *runningPtr, float user_scale, const int X_Limit, int *XPtr, int line, int *characterPtr, int *inword_characterPtr);   //Function prototype to assess whether a new line is needed 
 float x_coordinate(int *XPtr, int user_scale, int *characterPtr, struct SSF_char *SSF_lines, int p, float X_local);     //Function prototype to work out the X coordinate
@@ -82,7 +83,7 @@ int main()
 
     /*This section copies the data to the 'line' structure, where it is multiplied by the scaling values 
     for the relevant x and y movements*/  //MENTIONED LINE????
-    int SSF_NumberOfRows = 1027; //total number of rows (as said in the project brief document) used to work out the number of structural arrays
+    const int SSF_NumberOfRows = 1027; //total number of rows (as said in the project brief document) used to work out the number of structural arrays
     
     FILE *fPtr; //Assigns a pointer to the file 
     fPtr = fopen("SingleStrokeFont.txt", "r" );  //Opens the SingleStrokeFont file in read only
@@ -97,26 +98,8 @@ int main()
 
     struct SSF_char SSF_lines[SSF_NumberOfRows]; //Defines a structural array which will contain each line of the SingleStrokeFont file 
     
-    
-    //The for loop iterates over the structural array and copies the values from the SingleStrokFont file to it
-    for (int i = 0; i < SSF_NumberOfRows; i++)
-    {
-        int temp_a0, temp_a1, temp_a2;  //Declares temporary variables used to store float versions of the data from SingleStrokeFont
-        fscanf(fPtr,"%d %d %d", &temp_a0, &temp_a1, &temp_a2); //reads each value (seperated by a space) and copies it to the corresponding value in the 'lines' struct
-        
-        if (temp_a0 != 999)     //If NOT a0 (therefore working with the lines inbetween 999 - the x and y coordinates), execute the code inside the if statement:
-        {
-            SSF_lines[i].a0 = (float)temp_a0 * scale;   //assign the SSF_char struct values to the scaled SingleStrokeFont data (x coordinates)
-            SSF_lines[i].a1 = (float)temp_a1 * scale;   //assign the SSF_char struct values to the scaled SingleStrokeFont data (y coordinates)
-        }
+    scale_SSFData(fPtr, SSF_lines, SSF_NumberOfRows, scale);    //Calls function to 
 
-        else    //if a0 IS 999 (indicating the start of a new character), execute the code inside the else statement:
-        {
-          SSF_lines[i].a0 = temp_a0;    //Simply assigns the value of the temp placeholder to the SSF_char struct value
-          SSF_lines[i].a1 = temp_a1;    //Simply assigns the value of the temp placeholder to the SSF_char struct value
-        }
-        SSF_lines[i].a2 = temp_a2;      //Since a2 does not get affected by scaling, all elements are equated to the temp_a2 value
-    }
     fclose(fPtr); //Closes the SingleStrokeFont file
 
 
@@ -256,6 +239,30 @@ int main()
 
     return (0);
 }  
+
+//Function to scale the values of the SSF_char arrays based on the user scale
+void scale_SSFData(FILE *fPtr, struct SSF_char *SSF_lines, int SSF_NumberOfRows, float scale)
+{
+    //The for loop iterates over the structural array and copies the values from the SingleStrokFont file to it
+    for (int i = 0; i < SSF_NumberOfRows; i++)
+    {
+        int temp_a0, temp_a1, temp_a2;  //Declares temporary variables used to store float versions of the data from SingleStrokeFont
+        fscanf(fPtr,"%d %d %d", &temp_a0, &temp_a1, &temp_a2); //reads each value (seperated by a space) and copies it to the corresponding value in the 'lines' struct
+        
+        if (temp_a0 != 999)     //If NOT a0 (therefore working with the lines inbetween 999 - the x and y coordinates), execute the code inside the if statement:
+        {
+            SSF_lines[i].a0 = (float)temp_a0 * scale;   //assign the SSF_char struct values to the scaled SingleStrokeFont data (x coordinates)
+            SSF_lines[i].a1 = (float)temp_a1 * scale;   //assign the SSF_char struct values to the scaled SingleStrokeFont data (y coordinates)
+        }
+
+        else    //if a0 IS 999 (indicating the start of a new character), execute the code inside the else statement:
+        {
+          SSF_lines[i].a0 = temp_a0;    //Simply assigns the value of the temp placeholder to the SSF_char struct value
+          SSF_lines[i].a1 = temp_a1;    //Simply assigns the value of the temp placeholder to the SSF_char struct value
+        }
+        SSF_lines[i].a2 = temp_a2;      //Since a2 does not get affected by scaling, all elements are equated to the temp_a2 value
+    }
+}
 
 //Function to read a word and allocate it to the structure 'single_word'
 void ReadWord(int *inword_characterPtr, FILE *fPtr1, struct single_word *all_words, int *runningPtr, int word, int WordCount) //arguments for the function
