@@ -8,8 +8,6 @@
 
 #define bdrate 115200               /* 115200 baud */
 
-
-
 //Initialises structure that is used to store each word from a text file and it's characters
 struct single_word     
 {
@@ -283,6 +281,7 @@ void scale_SSFData(FILE *fPtr, struct SSF_char *SSF_lines, int SSF_NumberOfRows,
         }
         SSF_lines[i].a2 = temp_a2;      //Since a2 does not get affected by scaling, all elements are equated to the temp_a2 value
     }
+    return;
 }
 
 //Function to read a word and allocate it to the structure 'single_word'
@@ -313,7 +312,7 @@ void ReadWord(int *inword_characterPtr, FILE *fPtr1, struct single_word *all_wor
             //Ensures that the indexing of the word is correct and does not go out of bounds
             if (word >= WordCount) 
             {
-                printf("Word index out of bounds: %d\n", word);
+                printf("ERROR: Word index out of bounds: %d\n", word);
                 exit(1);    //Exits if the word indexing is out of bounds
             }
 
@@ -392,6 +391,11 @@ float x_coordinate(int *XPtr, int user_scale, int *characterPtr, struct SSF_char
 {
     *XPtr = user_scale * (*characterPtr);   //offsets the X position based on the user-defined scale and character position
     X_local = *XPtr + (SSF_lines[p].a0);    //Add the character's local movement (a0) to the offset X position
+    if (X_local < 0);
+    {
+        printf("ERROR: X movement of the robot is incorrect.\n");
+        exit(1);
+    }
     return X_local;     //Return the final local X coordinate
 }
 
@@ -400,6 +404,11 @@ float y_coordinate(int *YPtr, int user_scale, int line, const int line_spacing, 
 {
     *YPtr = 0 - user_scale - (user_scale * line) - (line_spacing * line);      //offsets the Y position based on the user-defined scale and current line
     Y_local = *YPtr + (SSF_lines[p].a1);       //Add the character's local movement (a1) to the offset Y position
+    if (Y_local > 0);
+    {
+        printf("ERROR: Y movement of the robot is incorrect.\n");
+        exit(1);
+    }
     return Y_local;  //Return the final local Y coordinate
 }
 
@@ -422,38 +431,3 @@ int pen_position(struct SSF_char *SSF_lines, int p)
         exit(1);   //exits program if there's an error changing states
     }
 }
-
-/*
-
-
-
-    // These are sample commands to draw out some information - these are the ones you will be generating.
-    sprintf (buffer, "G0 X-13.41849 Y0.000\n");
-    SendCommands(buffer);
-    sprintf (buffer, "S1000\n");
-    SendCommands(buffer);
-    sprintf (buffer, "G1 X-13.41849 Y-4.28041\n");
-    SendCommands(buffer);
-    sprintf (buffer, "G1 X-13.41849 Y0.0000\n");
-    SendCommands(buffer);
-    sprintf (buffer, "G1 X-13.41089 Y4.28041\n");
-    SendCommands(buffer);
-    sprintf (buffer, "S0\n");
-    SendCommands(buffer);
-    sprintf (buffer, "G0 X-7.17524 Y0\n");
-    SendCommands(buffer);
-
-
-    sprintf (buffer, "S1000\n");
-    SendCommands(buffer);
-    sprintf (buffer, "G0 X0 Y0\n");
-    SendCommands(buffer);
-
-    // Before we exit the program we need to close the COM port
-    CloseRS232Port();
-    printf("Com port now closed\n");
-
-    return (0);
-*/
-
-
