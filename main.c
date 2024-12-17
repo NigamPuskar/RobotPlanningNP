@@ -107,7 +107,7 @@ int main()
     //This checks whether the file was openend correctly or not, if it wasn't then the program will exit
     if (fPtr1 == NULL) 
     {
-        printf("ERROR: Could not open \"SingleStrokeTest!\"");
+        printf("ERROR: Could not open \"TestData!\"");
         exit(1);
     }
 
