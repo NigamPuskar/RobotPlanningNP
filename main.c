@@ -358,7 +358,7 @@ int NewLine(int *runningPtr, float user_scale, const int X_Limit, int *XPtr, int
     //Checks if the current word length is over the X limit
     if (length > X_Limit)
     {
-        *XPtr = 0;      //Resets the X position (starts a new line)
+        //*XPtr = 0;      //Resets the X position (starts a new line)
         *runningPtr = *inword_characterPtr;   //Updates the running character position of the new line depending on the length of the current word read
         line++; //Moves the word to the next line
         *characterPtr = 0;  //Resets the character position for the new line
