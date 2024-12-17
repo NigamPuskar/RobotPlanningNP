@@ -95,14 +95,14 @@ int main()
 
     struct SSF_char SSF_lines[SSF_NumberOfRows]; //Defines a structural array which will contain each line of the SingleStrokeFont file 
     
-    scale_SSFData(fPtr, SSF_lines, SSF_NumberOfRows, scale);    //Calls function to 
+    scale_SSFData(fPtr, SSF_lines, SSF_NumberOfRows, scale);    //Calls function to scale the values of the SSF_char arrays based on the user scale
 
     fclose(fPtr); //Closes the SingleStrokeFont file
 
 
-    //Opens the "SingleWordTest" file for reading input text
+    //Opens the sample text file for reading input text
     FILE *fPtr1; //Assigns a pointer to the file 
-    fPtr1 = fopen("SingleWordTest.txt", "r");
+    fPtr1 = fopen("TestData.txt", "r");
 
     //This checks whether the file was openend correctly or not, if it wasn't then the program will exit
     if (fPtr1 == NULL) 
@@ -391,7 +391,7 @@ float x_coordinate(int *XPtr, int user_scale, int *characterPtr, struct SSF_char
 {
     *XPtr = user_scale * (*characterPtr);   //offsets the X position based on the user-defined scale and character position
     X_local = *XPtr + (SSF_lines[p].a0);    //Add the character's local movement (a0) to the offset X position
-    if (X_local < 0);
+    if (X_local < 0)
     {
         printf("ERROR: X movement of the robot is incorrect.\n");
         exit(1);
@@ -404,7 +404,7 @@ float y_coordinate(int *YPtr, int user_scale, int line, const int line_spacing, 
 {
     *YPtr = 0 - user_scale - (user_scale * line) - (line_spacing * line);      //offsets the Y position based on the user-defined scale and current line
     Y_local = *YPtr + (SSF_lines[p].a1);       //Add the character's local movement (a1) to the offset Y position
-    if (Y_local > 0);
+    if (Y_local > 0)
     {
         printf("ERROR: Y movement of the robot is incorrect.\n");
         exit(1);
