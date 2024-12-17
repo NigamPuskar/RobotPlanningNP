@@ -1,15 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <conio.h>
-//#include <windows.h>
+#include <conio.h>
+#include <windows.h>
 #include "rs232.h"
 #include "serial.h"
 
 #define bdrate 115200               /* 115200 baud */
 
-//Function prototype to send commands to the robot
-void SendCommands (char *buffer );
 
 
 //Initialises structure that is used to store each word from a text file and it's characters
@@ -28,17 +26,19 @@ struct SSF_char
 };
 
 //Function Prototypes for tasks in the program
-void scale_SSFData(FILE *fPtr, struct SSF_char *SSF_lines, int SSF_NumberOfRows, float scale);
+void SendCommands (char *buffer );  //Function prototype to send commands to the robot
+
+void scale_SSFData(FILE *fPtr, struct SSF_char *SSF_lines, int SSF_NumberOfRows, float scale);  //Function prototype for scaling the "SingelStrokeFont.txt" data
 void ReadWord(int *inword_characterPtr, FILE *fPtr1, struct single_word *all_words, int *runningPtr, int word, int WordCount);  //Function prototype to read a single word and process it
 int NewLine(int *runningPtr, float user_scale, const int X_Limit, int line, int *characterPtr, int *inword_characterPtr);   //Function prototype to assess whether a new line is needed 
 float x_coordinate(int *XPtr, int user_scale, int *characterPtr, struct SSF_char *SSF_lines, int p, float X_local);     //Function prototype to work out the X coordinate
 float y_coordinate(int *YPtr, int user_scale, int line, const int line_spacing, struct SSF_char *SSF_lines, int p, float Y_local);  //Function prototype to work out the y coordinate
-
+int pen_position(struct SSF_char *SSF_lines, int p); //Function prototype to output pen-up/ pen-down position
 
 int main()
 {
     
-    char mode[]= {'8','N','1',0};
+    //char mode[]= {'8','N','1',0};
     char buffer[100];
 
     // If we cannot open the port then give up immediately
@@ -50,7 +50,6 @@ int main()
 
     // Time to wake up the robot
     printf ("\nAbout to wake up the robot\n");
-
     // We do this by sending a new-line
     sprintf (buffer, "\n");
      // printf ("Buffer to send: %s", buffer); // For diagnostic purposes only, normally comment out
@@ -139,7 +138,7 @@ int main()
     int running_CharCount = 0;  //Keeps a running count of ALL characters (multiple words)
     int *runningPtr = &running_CharCount;     //pointer to the running char count variable
 
-    int character_position = 0;  //Keeps a count of the current character position in a SINGLE word (for iterating through a word)
+    int character_position = 0;  //Keeps a count of the current character position in a word/line (for iterating through a word)
     int *characterPtr = &character_position;    //pointer to the character position variable
 
     int inword_CharCount;    //Keeps a count of the character count INSIDE a single word
@@ -174,15 +173,14 @@ int main()
             printf("all_words[%d].characters is NOT NULL\n", i);
         }
     }
-
     
     //These commands get the robot into 'ready to draw mode' and need to be sent before any writing commands
-    /*sprintf (buffer, "G1 X0 Y0 F1000\n");
+    sprintf (buffer, "G1 X0 Y0 F1000\n");
     SendCommands(buffer);
     sprintf (buffer, "M3\n");
     SendCommands(buffer);
     sprintf (buffer, "S0\n");
-    SendCommands(buffer);*/
+    SendCommands(buffer);
 
     /*For loop used to print out the G-Code for each character movement. The array reads in a single word,
     decides if it's within the x-axis width limit then loops through the characters in the 
@@ -218,10 +216,15 @@ int main()
                         //Calls functions to calculate character movement in the X and Y coordinates for each letter 
                         float x_local = x_coordinate(&X_GlobalOffset, user_scale, &character_position, SSF_lines, p, X_local);   
                         float y_local = y_coordinate(&Y_GlobalOffset, user_scale, line, line_spacing, SSF_lines, p, Y_local);
+                        //determines whether the pen state needs to be changed and sends the command for it
+                        if (SSF_lines[p].a2 != SSF_lines[p-1].a2)   //Compares pen state to previous pen state
+                        {
+                            int pen_state = pen_position(SSF_lines, p);     //function either returns '0' (pen up) or "1000" (pen down)
+                            snprintf(buffer, 100, "S%d\n", pen_state);      //converts output from function into G-Code
+                            SendCommands(buffer);
+                        }
                         snprintf(buffer, 100, "G%d X%f Y%f\n", SSF_lines[p].a2, x_local, y_local);
-                        //SendCommands(buffer); //Function commented out to allow for testing on G-Code simulator
-                        
-                        printf ("%s", buffer); //Prints out the G-Code to allow for tesing on G-code simulator
+                        SendCommands(buffer); 
                         p++;    //Moves to the next line of the SSF_lines structure
                     }
                     (*characterPtr)++;  //Moves to the next character in the word
@@ -229,16 +232,34 @@ int main()
             }
         }
     }
+
+    /*After all the functions have exited successfully, the pen is returned to the origin
+    in the pen-up state.*/
+    sprintf(buffer, "S0\n");
+    SendCommands(buffer);
     snprintf(buffer, 100, "G0 X0 Y0\n");
-    printf ("%s", buffer); //Prints out the G-Code to allow for tesing on G-code simulator
+    SendCommands(buffer);
+
     //free(all_words);    //dynamically frees the memory located in the all_words array
     
     // Before we exit the program we need to close the COM port
-    /*CloseRS232Port();
-    printf("Com port now closed\n");*/
+    CloseRS232Port();
+    printf("Com port now closed\n"); //Notifies the user the program has ended
 
-    return (0);
+    fclose(fPtr1);  //Closes the sample text file
+    return (0); //successfully ends the program 
 }  
+
+// Send the data to the robot - note in 'PC' mode you need to hit space twice
+// as the dummy 'WaitForReply' has a getch() within the function.
+void SendCommands (char *buffer )
+{
+    // printf ("Buffer to send: %s", buffer); // For diagnostic purposes only, normally comment out
+    PrintBuffer (&buffer[0]);
+    WaitForReply();
+    Sleep(100); // Can omit this when using the writing robot but has minimal effect
+    // getch(); // Omit this once basic testing with emulator has taken place
+}
 
 //Function to scale the values of the SSF_char arrays based on the user scale
 void scale_SSFData(FILE *fPtr, struct SSF_char *SSF_lines, int SSF_NumberOfRows, float scale)
@@ -369,17 +390,37 @@ int NewLine(int *runningPtr, float user_scale, const int X_Limit, int line, int 
 //Function to calculate the X coordinate based on the scaling and current character position
 float x_coordinate(int *XPtr, int user_scale, int *characterPtr, struct SSF_char *SSF_lines, int p, float X_local)
 {
-    *XPtr = user_scale * (*characterPtr);   //Scale the X position based on the user-defined scale and character position
-    X_local = *XPtr + (SSF_lines[p].a0);    //Add the character's offset (a0) to the scaled X position
+    *XPtr = user_scale * (*characterPtr);   //offsets the X position based on the user-defined scale and character position
+    X_local = *XPtr + (SSF_lines[p].a0);    //Add the character's local movement (a0) to the offset X position
     return X_local;     //Return the final local X coordinate
 }
 
 //Function to calculate the Y coordinate based on the scaling and current line
 float y_coordinate(int *YPtr, int user_scale, int line, const int line_spacing, struct SSF_char *SSF_lines, int p, float Y_local)
 {
-    *YPtr = 0 - user_scale - (user_scale * line) - (line_spacing * line);      //Scale the Y position based on the user-defined scale and current line
-    Y_local = *YPtr + (SSF_lines[p].a1);       //Add the character's offset (a1) to the scaled Y position
+    *YPtr = 0 - user_scale - (user_scale * line) - (line_spacing * line);      //offsets the Y position based on the user-defined scale and current line
+    Y_local = *YPtr + (SSF_lines[p].a1);       //Add the character's local movement (a1) to the offset Y position
     return Y_local;  //Return the final local Y coordinate
+}
+
+//function to calculate the position of the pen (pen up or pen down)
+int pen_position(struct SSF_char *SSF_lines, int p)
+{
+    int pen_up = 0;   //used for G-Code pen up (S0)
+    int pen_down = 1000;  //Used for G-Code pen down (S1000)
+    if (SSF_lines[p].a2 == 0)
+    {
+        return pen_up;
+    }
+    else if (SSF_lines[p].a2 == 1)
+    {
+        return pen_down;
+    }
+    else
+    {
+        printf("ERROR: pen can not change states.\n");  
+        exit(1);   //exits program if there's an error changing states
+    }
 }
 
 /*
@@ -413,18 +454,6 @@ float y_coordinate(int *YPtr, int user_scale, int line, const int line_spacing, 
     printf("Com port now closed\n");
 
     return (0);
-
-
-// Send the data to the robot - note in 'PC' mode you need to hit space twice
-// as the dummy 'WaitForReply' has a getch() within the function.
-void SendCommands (char *buffer )
-{
-    // printf ("Buffer to send: %s", buffer); // For diagnostic purposes only, normally comment out
-    PrintBuffer (&buffer[0]);
-    WaitForReply();
-    Sleep(100); // Can omit this when using the writing robot but has minimal effect
-    // getch(); // Omit this once basic testing with emulator has taken place
-}
-
-
 */
+
+
