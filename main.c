@@ -30,7 +30,7 @@ struct SSF_char
 //Function Prototypes for tasks in the program
 void scale_SSFData(FILE *fPtr, struct SSF_char *SSF_lines, int SSF_NumberOfRows, float scale);
 void ReadWord(int *inword_characterPtr, FILE *fPtr1, struct single_word *all_words, int *runningPtr, int word, int WordCount);  //Function prototype to read a single word and process it
-int NewLine(int *runningPtr, float user_scale, const int X_Limit, int *XPtr, int line, int *characterPtr, int *inword_characterPtr);   //Function prototype to assess whether a new line is needed 
+int NewLine(int *runningPtr, float user_scale, const int X_Limit, int line, int *characterPtr, int *inword_characterPtr);   //Function prototype to assess whether a new line is needed 
 float x_coordinate(int *XPtr, int user_scale, int *characterPtr, struct SSF_char *SSF_lines, int p, float X_local);     //Function prototype to work out the X coordinate
 float y_coordinate(int *YPtr, int user_scale, int line, const int line_spacing, struct SSF_char *SSF_lines, int p, float Y_local);  //Function prototype to work out the y coordinate
 
@@ -194,7 +194,7 @@ int main()
     {
         ReadWord(&inword_CharCount, fPtr1, all_words, &running_CharCount, word, WordCount);  //Reads a word from the text file and updates the all_words[word].characters array
 
-        line = NewLine(&running_CharCount, user_scale, X_Limit, XPtr, line, &character_position, &inword_CharCount);  //Determines whether a newline is needed or not 
+        line = NewLine(&running_CharCount, user_scale, X_Limit, line, &character_position, &inword_CharCount);  //Determines whether a newline is needed or not 
         
         //Loops through each character in a word
         for (int w = 0; all_words[word].characters[w] != '\0'; w++ ) 
@@ -352,13 +352,12 @@ void ReadWord(int *inword_characterPtr, FILE *fPtr1, struct single_word *all_wor
 }
 
 //Function that checks the current position of a word, and determines if it should go on a new line
-int NewLine(int *runningPtr, float user_scale, const int X_Limit, int *XPtr, int line, int *characterPtr, int *inword_characterPtr)
+int NewLine(int *runningPtr, float user_scale, const int X_Limit, int line, int *characterPtr, int *inword_characterPtr)
 {  
     int length = (*runningPtr) * user_scale;  //Calculates the length of a word based on the running character position and the user_scale
     //Checks if the current word length is over the X limit
     if (length > X_Limit)
     {
-        //*XPtr = 0;      //Resets the X position (starts a new line)
         *runningPtr = *inword_characterPtr;   //Updates the running character position of the new line depending on the length of the current word read
         line++; //Moves the word to the next line
         *characterPtr = 0;  //Resets the character position for the new line
